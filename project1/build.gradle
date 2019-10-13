@@ -1,12 +1,15 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.9.RELEASE'
+	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'org.openjfx.javafxplugin' version '0.0.8'
+	id 'application'
 	id 'java'
 }
 
 group = 'com.mk.multiscale-modeling'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+
+sourceCompatibility = '12.0.1'
 
 configurations {
 	compileOnly {
@@ -24,4 +27,18 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compile "com.jfoenix:jfoenix:${jfoenixVersion}"
+
+    compile group: 'org.openjfx', name: 'javafx-graphics', version: "${openjfxVersion}"
+	compile group: 'org.openjfx', name: 'javafx-fxml', version: "${openjfxVersion}"
+	compile group: 'org.openjfx', name: 'javafx-base', version: "${openjfxVersion}"
+	compile group: 'org.openjfx', name: 'javafx-controls', version: "${openjfxVersion}"
 }
+
+javafx {
+    version = "${openjfxVersion}"
+    modules = [ 'javafx.graphics', 'javafx.fxml', 'javafx.base', 'javafx.controls' ]
+}
+
+mainClassName = 'Project1Application'
