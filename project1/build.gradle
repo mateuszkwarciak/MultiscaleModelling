@@ -9,7 +9,7 @@ plugins {
 group = 'com.mk.multiscale-modeling'
 version = '0.0.1-SNAPSHOT'
 
-sourceCompatibility = '12.0.1'
+sourceCompatibility = '11.0.1'
 
 configurations {
 	compileOnly {
@@ -27,6 +27,8 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: "${apacheCommonsVersion}"
 
 	compile "com.jfoenix:jfoenix:${jfoenixVersion}"
 

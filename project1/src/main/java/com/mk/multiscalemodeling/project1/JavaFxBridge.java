@@ -11,6 +11,8 @@ public class JavaFxBridge extends Application {
 	private Parent rootNode;
     private FXMLLoader fxmlLoader;
     
+    public static final String APPLICATION_TITLE = "Kryszta³ki";
+    
 	public static void main(String[] args) {
         launch(args);
     }
@@ -26,7 +28,7 @@ public class JavaFxBridge extends Application {
     	fxmlLoader.setLocation(getClass().getResource("/fxml/start.fxml"));
         rootNode = fxmlLoader.load();
         
-        primaryStage.setTitle("Kryszta³ki");
+        primaryStage.setTitle(APPLICATION_TITLE);
         
         Scene scene = new Scene(rootNode, 700, 400);
         primaryStage.setScene(scene);
