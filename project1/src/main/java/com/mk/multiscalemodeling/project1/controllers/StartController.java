@@ -5,13 +5,18 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
+import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
+import com.mk.multiscalemodeling.project1.simulation.SimulationStatus;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -21,6 +26,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -30,10 +40,12 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.converter.IntegerStringConverter;
+import javafx.util.converter.NumberStringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StartController implements Initializable{
+public class StartController {
 
 	@FXML private AnchorPane rootPane;
     @FXML private JFXButton newBtn;
@@ -41,81 +53,21 @@ public class StartController implements Initializable{
     @FXML private JFXButton optionsBtn;
     @FXML private JFXButton exitBtn;
     @FXML private StackPane dialogPane;
-    
-    private JFXDialog dialog;
-    
+
     private Stage popUpStage;
     
-    private static int MINIMUM_MATRIX_SIZE = 300;
+    private static final int MINIMUM_MATRIX_SIZE = 300;  
+    private static final String NEW_WINDOW_HEADER = "New configuration";
+    private static final String NEW_WINDOW_BODY = "Set simulation size:";
+    private static final String NEW_WINDOW_ERROR = "Should be an integer greater then 299";
     
-    @Override
-	public void initialize(URL location, ResourceBundle resources) {
-    	dialogPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-    		closeDialogPane();
-		});
-	}
+    @Autowired
+    private SimulationManager simulationManager;
     
     @FXML
     void newAction(ActionEvent event) {
-    	//generateNewProjectConfigurationDialog();
-    	showNewProjectPopUpWindow();
+        prepareAndShowNewProjectPopUpWindow();
     }
-    
-	private void showNewProjectPopUpWindow() {
-		generateNewProjectLoyaut();
-	}
-
-	private void generateNewProjectLoyaut() {
-		VBox newProjectLayout = new VBox();
-		newProjectLayout.setPadding(new Insets(20, 30, 20, 30));
-
-		Text headingText = new Text("New configuration");
-		Text bodyText = new Text("Set simulation size");
-		
-		JFXTextField hightField = new JFXTextField();
-		hightField.setLabelFloat(true);
-		hightField.setPromptText("Hight");
-		
-		
-    	JFXTextField widthField = new JFXTextField("Width");
-		
-    	JFXButton createBtn = new JFXButton("Create");
-    	JFXButton closeBtn = new JFXButton("Close");
-    	
-    	createBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-    		//TODO USUNAC PO NAPRAWIE BLEDU Z TEXT FIELDS
-    		goToSimulationScheme();
-    		popUpStage.close();
-    		Stage rootStage = (Stage) rootPane.getScene().getWindow();
-    		rootStage.close();
-    		
-			/*
-			 * int matrixDimY = readTextFieldValue(hightField); int matrixDimX =
-			 * readTextFieldValue(widthField);
-			 * 
-			 * if (matrixDimY < MINIMUM_MATRIX_SIZE) {
-			 * hightField.setText("Wrong value! Should be an integer greater then 299"); }
-			 * 
-			 * if (matrixDimX < MINIMUM_MATRIX_SIZE) {
-			 * widthField.setText("Wrong value! Should be an integer greater then 299"); }
-			 * 
-			 * if (matrixDimY >= MINIMUM_MATRIX_SIZE && matrixDimX >= MINIMUM_MATRIX_SIZE) {
-			 * //utworz nowy projekt goToSimulationScheme();
-			 * 
-			 * log.info("Start new project: "); popUpStage.close(); }
-			 */
-    		
-    	});
-    	
-    	closeBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-    		log.debug("PopUpWindow closed");
-    		popUpStage.close();
-    	});
-    	//hightField, widthField,
-    	newProjectLayout.getChildren().addAll(headingText, bodyText, createBtn, closeBtn);
-    	
-		displayPopUpWindow(newProjectLayout);
-	}
     
     @FXML
     void loadAction(ActionEvent event) {
@@ -129,18 +81,85 @@ public class StartController implements Initializable{
     
     @FXML
     void exitAction(ActionEvent event) {
-    	
+        closeProgram();
+    }
+    
+    private void prepareAndShowNewProjectPopUpWindow() {
+        VBox newProjectLayout = new VBox();
+        newProjectLayout.setPadding(new Insets(20, 30, 20, 30));
+        newProjectLayout.setSpacing(15.0);
+        
+        Text headingText = new Text(NEW_WINDOW_HEADER);
+        Text bodyText = new Text(NEW_WINDOW_BODY);
+        
+        Label errorLbl = new Label();       
+        Separator headingBodySeparator = new Separator();
+        
+        JFXTextField hightField = new JFXTextField();
+        hightField.setLabelFloat(true);
+        hightField.setPromptText("Hight");
+        hightField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        hightField.focusTraversableProperty().set(false);
+        
+        JFXTextField widthField = new JFXTextField();
+        widthField.setLabelFloat(true);
+        widthField.setPromptText("Width");
+        widthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        widthField.focusTraversableProperty().set(false);
+        
+        JFXButton createBtn = new JFXButton("Create");
+        JFXButton closeBtn = new JFXButton("Close");
+        createBtn.focusTraversableProperty().set(false);
+        closeBtn.focusTraversableProperty().set(false);
+        
+        createBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            errorLbl.setText("");
+            
+            int widthOfSimulation = readTextFieldValue(hightField);
+            int hightOfSimulation = readTextFieldValue(widthField);
+
+            if (widthOfSimulation < MINIMUM_MATRIX_SIZE || hightOfSimulation < MINIMUM_MATRIX_SIZE) {
+                errorLbl.setText(NEW_WINDOW_ERROR);
+            }
+
+            if (widthOfSimulation >= MINIMUM_MATRIX_SIZE && hightOfSimulation >= MINIMUM_MATRIX_SIZE) {
+                log.info("Start new simulation: ");
+                
+                simulationManager.init(SimulationStatus.NEW, widthOfSimulation, hightOfSimulation);
+                
+                goToSimulationScheme();
+                closeStartWindow();
+            }
+        });
+        
+        closeBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.debug("PopUpWindow closed");
+            popUpStage.close();
+        });
+
+        AnchorPane buttonPane = new AnchorPane();
+        buttonPane.setPrefHeight(100);
+        buttonPane.getChildren().addAll(closeBtn, createBtn);
+        
+        AnchorPane.setLeftAnchor(closeBtn, 0.0);
+        AnchorPane.setRightAnchor(createBtn, 0.0);
+        AnchorPane.setBottomAnchor(closeBtn, 11.0);
+        AnchorPane.setBottomAnchor(createBtn, 11.0);
+        
+        newProjectLayout.getChildren().addAll(headingText, headingBodySeparator, bodyText, errorLbl, hightField, widthField, buttonPane);
+        
+        displayPopUpWindow(newProjectLayout, 300, 280);
     }
     
     private double popUpWindowOffsetX = 0;
     private double popUpWindowOffsetY = 0;
     
-    private void displayPopUpWindow(Parent layout) {
+    private void displayPopUpWindow(Parent layout, int width, int height) {
 		popUpStage = new Stage();
 		popUpStage.initModality(Modality.APPLICATION_MODAL);
 		popUpStage.initStyle(StageStyle.UNDECORATED);
 
-		Scene popUpScene = new Scene(layout, 300, 300);
+		Scene popUpScene = new Scene(layout, width, height);
 		popUpScene.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -176,74 +195,10 @@ public class StartController implements Initializable{
 			simulationStage.show();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.warn("Error during opening simulation window: {}", e);
 		}
     }
-    
-    private void buildAndDisplayDialog(JFXDialogLayout layout) {
-    	setDialogPaneDisableStatus(false);
-    	
-    	dialog = new JFXDialog(dialogPane, layout, JFXDialog.DialogTransition.CENTER);
-    	dialog.show();
-    }
-   
-        
-    private JFXDialogLayout buildLayout(Node layoutHeading, Pane bodyPane, JFXButton leftButton, JFXButton rightButton) {
-    	JFXDialogLayout dialogLayout = new JFXDialogLayout();
-    	
-    	dialogLayout.setHeading(layoutHeading);
-    	dialogLayout.setBody(bodyPane);
-    	dialogLayout.setActions(leftButton, rightButton);
-    	
-    	return dialogLayout;
-    }
-    
-    private void generateNewProjectConfigurationDialog() {
-    	Text headingText = new Text("New configuration");
-    	
-    	VBox bodyPane = new VBox();   	
-    	Text bodyText = new Text("Set simulation size");
-    	JFXTextField hightField = new JFXTextField("Hight");
-    	JFXTextField widthField = new JFXTextField("Widthaaa");
-    	
-    	bodyPane.getChildren().addAll(bodyText, widthField);
-    	
-    	JFXButton create = new JFXButton("Create");
-    	JFXButton exit = new JFXButton("Exit");
-    	
-    	create.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-    		int matrixDimY = readTextFieldValue(hightField);
-    		int matrixDimX = readTextFieldValue(widthField);
-    		
-    		if (matrixDimY < MINIMUM_MATRIX_SIZE) {
-    			hightField.setText("Wrong value! Should be an integer greater then 299");
-    		}
-    		
-    		if (matrixDimX < MINIMUM_MATRIX_SIZE) {
-    			widthField.setText("Wrong value! Should be an integer greater then 299");
-    		} 
-    		
-    		if (matrixDimY >= MINIMUM_MATRIX_SIZE && matrixDimX >= MINIMUM_MATRIX_SIZE) {
-    			//otworz nowy prijekt
-    			
-    			log.info("Start new project: ");
-    			closeDialogPane();
-    		}
-    		
-    	});
-    	
-    	exit.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-    		closeDialogPane();
-    	});
-    	
-    	JFXDialogLayout newProjectConfigurationLayout = buildLayout(headingText, bodyPane, create, exit);
-
-    	newProjectConfigurationLayout.setMinHeight(300.0);
-    	
-    	buildAndDisplayDialog(newProjectConfigurationLayout);
-    }
-        
+            
     private int readTextFieldValue(JFXTextField textField) {
     	String textFromField = textField.getText();
 
@@ -262,13 +217,17 @@ public class StartController implements Initializable{
     	}
     }
     
-    private void closeDialogPane() {
-		dialog.close();
-		dialogPane.setDisable(true);
-		
+    private void closeStartWindow() {
+        log.info("Closing StartWindow");
+        popUpStage.close();
+        Stage rootStage = (Stage) rootPane.getScene().getWindow();
+        rootStage.close();
     }
     
-    private void setDialogPaneDisableStatus(boolean status) {
-    	dialogPane.setDisable(false);
+    private void closeProgram() {
+        closeStartWindow();
+        log.info("Closing program");
+        Platform.exit();
     }
+
 }
