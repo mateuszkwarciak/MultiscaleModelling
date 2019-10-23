@@ -1,15 +1,13 @@
 package com.mk.multiscalemodeling.project1.controllers;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
@@ -21,27 +19,20 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.converter.IntegerStringConverter;
-import javafx.util.converter.NumberStringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -60,6 +51,9 @@ public class StartController {
     private static final String NEW_WINDOW_HEADER = "New configuration";
     private static final String NEW_WINDOW_BODY = "Set simulation size:";
     private static final String NEW_WINDOW_ERROR = "Should be an integer greater then 299";
+    
+    @Value("${project1.developModeEnabled}")
+    private boolean developModeEnabled;
     
     @Autowired
     private SimulationManager simulationManager;
@@ -106,6 +100,11 @@ public class StartController {
         widthField.setPromptText("Width");
         widthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         widthField.focusTraversableProperty().set(false);
+        
+        if (developModeEnabled) {
+            hightField.setText("300");
+            widthField.setText("300");
+        }
         
         JFXButton createBtn = new JFXButton("Create");
         JFXButton closeBtn = new JFXButton("Close");

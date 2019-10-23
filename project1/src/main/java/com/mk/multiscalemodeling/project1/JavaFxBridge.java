@@ -1,5 +1,8 @@
 package com.mk.multiscalemodeling.project1;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,6 +11,8 @@ import javafx.stage.Stage;
 
 public class JavaFxBridge extends Application {
 
+    private static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
+    
 	private Parent rootNode;
     private FXMLLoader fxmlLoader;
     
@@ -20,6 +25,7 @@ public class JavaFxBridge extends Application {
     @Override
 	public void init() throws Exception {
     	fxmlLoader = new FXMLLoader();
+    	fxmlLoader.setControllerFactory(clazz -> applicationContext.getBean(clazz));
 		super.init();
 	}
 
