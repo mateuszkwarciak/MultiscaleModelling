@@ -4,37 +4,45 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 
 import javafx.application.Platform;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SimulationController implements Initializable {
 
-    private JFXDrawer parametersPanel;
-    private JFXHamburger parametersBtn;
+    @FXML private JFXHamburger parametersBtn;
+    @FXML private ImageView saveBtn;
+    @FXML private ImageView exitBtn;
+    @FXML private ScrollPane paneForCanvas;
+    @FXML private JFXDrawer parametersPane;
     
+    @Autowired
     private SimulationParametersController parametersController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            parametersController = new SimulationParametersController();
-            parametersController.setSimulationController(this);
+            //parametersController = new SimulationParametersController();
+            //parametersController.setSimulationController(this);
             
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("DRAWER FXMLl"));
-            loader.setController(parametersController);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/simulationParameters.fxml"));
+            //loader.setController(parametersController);
             
-            AnchorPane mainPaneForParameters = (AnchorPane) loader.load();
+            ScrollPane mainPaneForParameters = (ScrollPane) loader.load();
 
-            parametersPanel.setSidePane(mainPaneForParameters);
+            parametersPane.setSidePane(mainPaneForParameters);
 
         } catch (IOException e) {
             log.error("Error during controller initialization. {}", e);
@@ -47,12 +55,12 @@ public class SimulationController implements Initializable {
             showParametersBtnTask.setRate(showParametersBtnTask.getRate() * -1);
             showParametersBtnTask.play();
             
-            if (parametersPanel.isOpened()) {
-                parametersPanel.close();
-                parametersPanel.setDisable(true);
+            if (parametersPane.isOpened()) {
+                parametersPane.close();
+                parametersPane.setDisable(true);
             } else {
-                parametersPanel.setDisable(false);
-                parametersPanel.open();
+                parametersPane.setDisable(false);
+                parametersPane.open();
             }
         });
     }
