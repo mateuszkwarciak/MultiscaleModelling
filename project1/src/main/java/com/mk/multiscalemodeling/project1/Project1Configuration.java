@@ -1,7 +1,5 @@
 package com.mk.multiscalemodeling.project1;
 
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import com.mk.multiscalemodeling.project1.controllers.SimulationController;
 import com.mk.multiscalemodeling.project1.controllers.SimulationParametersController;
 import com.mk.multiscalemodeling.project1.controllers.StartController;
-import com.mk.multiscalemodeling.project1.model.GrainsManager;
+import com.mk.multiscalemodeling.project1.simulation.GrainsManager;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 
 import lombok.extern.slf4j.Slf4j;
