@@ -1,14 +1,20 @@
 package com.mk.multiscalemodeling.project1.controllers;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.Project1Configuration;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 import com.mk.multiscalemodeling.project1.simulation.SimulationStatus;
@@ -18,6 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -35,7 +42,8 @@ import javafx.stage.StageStyle;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StartController {
+@Component
+public class StartController implements Initializable{
 
 	@FXML private AnchorPane rootPane;
     @FXML private JFXButton newBtn;
@@ -44,6 +52,8 @@ public class StartController {
     @FXML private JFXButton exitBtn;
     @FXML private StackPane dialogPane;
 
+    private static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
+    
     private Stage popUpStage;
     
     private static final int MINIMUM_MATRIX_SIZE = 300;  
@@ -54,8 +64,11 @@ public class StartController {
     @Value("${project1.developModeEnabled}")
     private boolean developModeEnabled;
     
-    @Autowired
+    //@Autowired
     private SimulationManager simulationManager;
+    
+    //@Autowired
+    private SimulationController simulationController;
     
     @FXML
     void newAction(ActionEvent event) {
@@ -124,8 +137,12 @@ public class StartController {
                 log.info("Start new simulation: ");
                 
                 simulationManager.init(SimulationStatus.NEW, widthOfSimulation, hightOfSimulation);
+                //simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
                 
                 goToSimulationScheme();
+                
+                simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
+                
                 closeStartWindow();
             }
         });
@@ -170,7 +187,6 @@ public class StartController {
 			public void handle(MouseEvent event) {
 				popUpStage.setX(event.getScreenX() - popUpWindowOffsetX);
 				popUpStage.setY(event.getScreenY() - popUpWindowOffsetY);
-
 			}
 		});
 
@@ -182,6 +198,7 @@ public class StartController {
     	try {
     		FXMLLoader fxmlLoader = new FXMLLoader();
         	fxmlLoader.setLocation(getClass().getResource("/fxml/simulation.fxml"));
+        	fxmlLoader.setController(simulationController);
         	
         	Stage simulationStage = new Stage();
 			Parent root = fxmlLoader.load();
@@ -189,9 +206,10 @@ public class StartController {
 			Scene simulationScene = new Scene(root);
 			
 			simulationStage.setTitle(JavaFxBridge.APPLICATION_TITLE);
+			simulationStage.setMinHeight(650);
+			simulationStage.setMinWidth(800);
 			simulationStage.setScene(simulationScene);
 			simulationStage.show();
-			
 		} catch (IOException e) {
 			log.warn("Error during opening simulation window: {}", e);
 		}
@@ -226,6 +244,12 @@ public class StartController {
         closeStartWindow();
         log.info("Closing program");
         Platform.exit();
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        simulationController = applicationContext.getBean(SimulationController.class);
+        simulationManager = applicationContext.getBean(SimulationManager.class);
     }
 
 }

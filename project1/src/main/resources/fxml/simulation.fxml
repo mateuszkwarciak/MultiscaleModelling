@@ -2,17 +2,18 @@
 
 <?import com.jfoenix.controls.JFXDrawer?>
 <?import com.jfoenix.controls.JFXHamburger?>
+<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mk.multiscalemodeling.project1.controllers.SimulationController">
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <AnchorPane prefHeight="50.0" style="-fx-background-color: #fdd835;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <AnchorPane prefHeight="50.0" style="-fx-background-color: #fdd835;" stylesheets="@../css/style.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <JFXHamburger fx:id="parametersBtn" layoutX="21.0" layoutY="18.0" AnchorPane.leftAnchor="21.0" AnchorPane.topAnchor="18.0" />
             <Label layoutX="67.0" layoutY="5.0" prefHeight="40.0" prefWidth="140.0" text="Kryształki" AnchorPane.leftAnchor="67.0" AnchorPane.topAnchor="5.0">
@@ -32,7 +33,15 @@
             </ImageView>
          </children>
       </AnchorPane>
-      <ScrollPane fx:id="paneForCanvas" layoutX="263.0" layoutY="214.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" />
-      <JFXDrawer fx:id="parametersPane" defaultDrawerSize="320.0" prefHeight="550.0" prefWidth="320.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
+      <ScrollPane fx:id="scrollPane" layoutY="50.0" prefHeight="200.0" prefWidth="200.0" stylesheets="@../css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+         <content>
+            <StackPane fx:id="paneForCanvas" prefHeight="542.0" prefWidth="791.0" style="-fx-background-color: #ebebeb;" stylesheets="@../css/style.css">
+               <children>
+                  <Canvas fx:id="canvas" height="200.0" width="200.0" />
+               </children>
+            </StackPane>
+         </content>
+      </ScrollPane>
+      <JFXDrawer fx:id="parametersPane" alignment="TOP_CENTER" defaultDrawerSize="320.0" prefHeight="550.0" prefWidth="320.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
    </children>
 </AnchorPane>
