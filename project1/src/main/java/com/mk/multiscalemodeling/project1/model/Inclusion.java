@@ -4,8 +4,9 @@ import javafx.scene.paint.Color;
 
 public class Inclusion extends Grain {
    
+    public static Color COLOR = Color.BLACK;
+    
     private GrainStatus status = GrainStatus.INCLUSION;
-    private static Color COLOR = Color.BLACK;
     
     @Override
     public GrainStatus getStatus() {
