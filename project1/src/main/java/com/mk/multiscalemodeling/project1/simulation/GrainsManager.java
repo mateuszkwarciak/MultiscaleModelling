@@ -31,7 +31,7 @@ public class GrainsManager {
         }
         
         List<Grain> neuclons = new ArrayList<>();
-        IntStream.rangeClosed(0, count).forEach(e -> {
+        IntStream.rangeClosed(0, count - 1).forEach(e -> {
             neuclons.add(createNeuclon());
         });
         
@@ -40,7 +40,7 @@ public class GrainsManager {
 
     public Grain createNeuclon() {
         Color neuclonColor = getRandomColor();
-        while (color2grain.containsKey(neuclonColor)) {
+        while (color2grain.containsKey(neuclonColor) || neuclonColor.equals(Inclusion.COLOR)) {
             neuclonColor = getRandomColor();
         }
         

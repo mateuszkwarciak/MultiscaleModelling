@@ -5,22 +5,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.jfoenix.controls.JFXAlert;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
-import com.jfoenix.transitions.hamburger.HamburgerBasicCloseTransition;
-import com.jfoenix.transitions.hamburger.HamburgerSlideCloseTransition;
-import com.mk.multiscalemodeling.project1.Project1Configuration;
+import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.model.Cell;
+import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 
 import javafx.application.Platform;
@@ -29,8 +24,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -59,16 +52,12 @@ public class SimulationController implements Initializable {
     private SimulationManager simulationManager;
 
     private Color CANVAS_BACKGROUND = Color.GHOSTWHITE;
-    
-    
-    private static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
-
-    int canvasDimX, canvasDimY;
+    private int CELL_SIZE = 3;
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        parametersController = applicationContext.getBean(SimulationParametersController.class);
-        simulationManager = applicationContext.getBean(SimulationManager.class);
+        parametersController = JavaFxBridge.applicationContext.getBean(SimulationParametersController.class);
+        simulationManager = JavaFxBridge.applicationContext.getBean(SimulationManager.class);
         
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/simulationParameters.fxml"));
@@ -110,15 +99,29 @@ public class SimulationController implements Initializable {
         });
     }
         
-    public void setCanvasSize(int width, int hight) {
-        this.canvasDimX = width;
-        this.canvasDimY = hight;
-        
-        canvas.setWidth(canvasDimX);
-        canvas.setHeight(canvasDimY);
+    public void setCanvasSize(int width, int hight) { 
+        canvas.setWidth(width * CELL_SIZE);
+        canvas.setHeight(hight * CELL_SIZE);
                 
-        log.info("RESIZE: dimX {}, dimY {}", canvasDimX, canvasDimY);
+        log.info("RESIZE: dimX {}, dimY {}", canvas.getWidth(), canvas.getHeight());
         earseCanvas();
+    }
+    
+    public void drawCellsOnCanvas(Cell[][] cells) {
+        earseCanvas();
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        
+        // it starts from 1 to move away from the absorbing edge
+        for (int i = 1; i < simulationManager.getDimX(); i++) {
+            for (int j = 1; j < simulationManager.getDimY(); j++) {
+                // draw if cell not empty
+                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED)) {
+                    gc.setFill(cells[i][j].getGrain().getColor());
+                    // subtract 1 to avoid drawing white frame 
+                    gc.fillRect((i - 1) * CELL_SIZE, (j - 1) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }   
+            }
+        }
     }
     
     private void earseCanvas() {
@@ -152,6 +155,7 @@ public class SimulationController implements Initializable {
     }
     
     private void prepareAndShowSaveAlert() {
+        //TODO
         JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
         alert.initModality(Modality.APPLICATION_MODAL);
         

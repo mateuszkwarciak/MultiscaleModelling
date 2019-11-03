@@ -3,9 +3,9 @@ package com.mk.multiscalemodeling.project1.simulation;
 import java.util.List;
 import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
@@ -20,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class SimulationManager {
 
     private SimulationStatus simulationStatus;
-    
-    @Autowired
     private GrainsManager grainsManager;
     
     @Getter private int dimX;
@@ -34,13 +32,17 @@ public class SimulationManager {
         this.dimX = dimX;
         this.dimY = dimY;
         
+        grainsManager = JavaFxBridge.applicationContext.getBean(GrainsManager.class);
+        
         initCells();
-        log.trace("Initialize sumulation with params{}", this.toString());
+        log.info("Initialize sumulation with params dimX{}, dimY {}", dimX, dimY);
     }
     
     public void addNucleonsToSimulation(int count) {
         List<Grain> nucleonsToAdd = grainsManager.createNeuclons(count);
-
+        
+        log.debug("Adding {} neuclons to simulation", count);
+        
         Random rand = new Random();
         while (!nucleonsToAdd.isEmpty()) {
             // add 1 to move away from the absorbing edge
@@ -52,6 +54,7 @@ public class SimulationManager {
             if (selectedCell.getStatus().equals(CellStatus.EMPTY)) {
                 selectedCell.setStatus(CellStatus.OCCUPIED);
                 selectedCell.setGrain(nucleonsToAdd.remove(0));;
+                log.trace("Nucleon added to cell array ({},{})", randomX, randomY);
             }
         }
     }

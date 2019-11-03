@@ -6,14 +6,11 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
-import com.mk.multiscalemodeling.project1.Project1Configuration;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 import com.mk.multiscalemodeling.project1.simulation.SimulationStatus;
@@ -50,9 +47,7 @@ public class StartController implements Initializable{
     @FXML private JFXButton optionsBtn;
     @FXML private JFXButton exitBtn;
     @FXML private StackPane dialogPane;
-
-    private static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
-    
+ 
     private Stage popUpStage;
     
     private static final int MINIMUM_MATRIX_SIZE = 300;  
@@ -125,8 +120,8 @@ public class StartController implements Initializable{
         createBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             errorLbl.setText("");
             
-            int widthOfSimulation = readTextFieldValue(hightField);
-            int hightOfSimulation = readTextFieldValue(widthField);
+            int widthOfSimulation = readIntegerFromField(hightField);
+            int hightOfSimulation = readIntegerFromField(widthField);
 
             if (widthOfSimulation < MINIMUM_MATRIX_SIZE || hightOfSimulation < MINIMUM_MATRIX_SIZE) {
                 errorLbl.setText(NEW_WINDOW_ERROR);
@@ -214,7 +209,8 @@ public class StartController implements Initializable{
 		}
     }
             
-    private int readTextFieldValue(JFXTextField textField) {
+    private int readIntegerFromField(JFXTextField textField) {
+        //TODO add handling of textFormatter
     	String textFromField = textField.getText();
 
     	if (StringUtils.isEmpty(textFromField)) {
@@ -247,8 +243,8 @@ public class StartController implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        simulationController = applicationContext.getBean(SimulationController.class);
-        simulationManager = applicationContext.getBean(SimulationManager.class);
+        simulationController = JavaFxBridge.applicationContext.getBean(SimulationController.class);
+        simulationManager = JavaFxBridge.applicationContext.getBean(SimulationManager.class);
     }
 
 }
