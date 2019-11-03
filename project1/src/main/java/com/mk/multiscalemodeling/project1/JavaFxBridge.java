@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 public class JavaFxBridge extends Application {
 
-    private static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
+    public static final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Project1Configuration.class);
     
 	private Parent rootNode;
     private FXMLLoader fxmlLoader;
