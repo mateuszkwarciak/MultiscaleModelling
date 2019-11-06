@@ -13,7 +13,7 @@ import javafx.scene.image.WritableImage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Export {
+public class Exporter {
     
     public static void saveAsImage(Canvas canvasToSave, File file) throws IOException {
         if (!FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("png")) {

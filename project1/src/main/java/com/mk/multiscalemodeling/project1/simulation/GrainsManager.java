@@ -15,14 +15,18 @@ import com.mk.multiscalemodeling.project1.model.GrainStatus;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
 
 import javafx.scene.paint.Color;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class GrainsManager {
 
+    @Setter
     private Map<Color, GrainImpl> color2grain = new HashMap<>();
+    @Setter
     private List<GrainImpl> grains = new ArrayList<>();
+    @Setter
     private List<Inclusion> inclusions = new ArrayList<>();
 
     public List<Grain> createNeuclons(int count) {
@@ -44,7 +48,7 @@ public class GrainsManager {
             neuclonColor = getRandomColor();
         }
         
-        GrainImpl neuclon = new GrainImpl(GrainStatus.NEUCLON, neuclonColor);
+        GrainImpl neuclon = new GrainImpl(GrainStatus.GRAIN, neuclonColor);
         
         color2grain.put(neuclonColor, neuclon);
         grains.add(neuclon);

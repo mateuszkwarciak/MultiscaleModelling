@@ -14,6 +14,7 @@ import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +29,8 @@ public class SimulationManager {
     @Getter private int dimX;
     @Getter private int dimY;
     
+    @Getter
+    @Setter
     private Cell cells[][];
     
     public void init(SimulationStatus simulationStatus, int dimX, int dimY) {
@@ -37,8 +40,12 @@ public class SimulationManager {
         
         grainsManager = JavaFxBridge.applicationContext.getBean(GrainsManager.class);
         
-        initCells();
-        log.info("Initialize sumulation with params dimX{}, dimY {}", dimX, dimY);
+        if (this.simulationStatus.equals(SimulationStatus.NEW)) {
+            initCells();
+            log.info("Initialize simulation with params dimX{}, dimY {}", dimX, dimY);
+        } else {
+            log.info("Initialize loaded simulation with params dimX{}, dimY {}", dimX, dimY);
+        }
     }
     
     public void addNucleonsToSimulation(int count) {
@@ -84,10 +91,6 @@ public class SimulationManager {
         });
         
         return hasGrown;
-    }
-    
-    public Cell[][] getCells() {
-        return cells;
     }
     
     private void updateCells(Cell cellToUpdate, Grain grain) {

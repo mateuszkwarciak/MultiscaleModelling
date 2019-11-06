@@ -14,7 +14,7 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
-import com.mk.multiscalemodeling.project1.io.Export;
+import com.mk.multiscalemodeling.project1.io.Exporter;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
@@ -52,7 +52,6 @@ public class SimulationController implements Initializable {
     private SimulationParametersController parametersController;
     private SimulationManager simulationManager;
 
-    private Color CANVAS_BACKGROUND = Color.GHOSTWHITE;
     private int CELL_SIZE = 3;
     
     @Override
@@ -138,7 +137,7 @@ public class SimulationController implements Initializable {
     
     private void earseCanvas() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setFill(CANVAS_BACKGROUND);
+        gc.setFill(Cell.EMPTY_CELL_COLOR);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
     
@@ -179,14 +178,14 @@ public class SimulationController implements Initializable {
         saveAsImageBtn.setOnMouseClicked((e) -> {
             Canvas canvasToSave = new Canvas(simulationManager.getDimX(), simulationManager.getDimY());
             drawToImage(canvasToSave);
-            FileChooser fileChooser = new FileChooser(); //;
+            FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*png"));
             
-            File choosedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
-            if (choosedFile != null) {
+            File selectedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
+            if (selectedFile != null) {
                 try {
-                    Export.saveAsImage(canvasToSave, choosedFile);
-                    log.info("Simulation saved to: {}", choosedFile.getPath());
+                    Exporter.saveAsImage(canvasToSave, selectedFile);
+                    log.info("Simulation saved to: {}", selectedFile.getPath());
                 } catch (IOException ioe) {
                     log.info("Error during saving simulation into image");
                 }
