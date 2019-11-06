@@ -1,11 +1,8 @@
 package com.mk.multiscalemodeling.project1.model.neighbourdhood;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.RandomAccess;
-import java.util.Set;
 
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
@@ -13,7 +10,7 @@ import com.mk.multiscalemodeling.project1.model.Grain;
 
 public class VonNeuman implements Neighbourhood {
 
-    private static Random random = new Random();
+    private Random random = new Random();
     
     @Override
     public Grain tryToMatchTheGrain(Cell targetCell, Cell[][] cells) {        
@@ -39,7 +36,7 @@ public class VonNeuman implements Neighbourhood {
         if (matchedGrains.size() == 1) {
             return matchedGrains.get(0);
         } else if (matchedGrains.size() > 1) {
-            matchedGrains.get(random.nextInt(matchedGrains.size()));
+            return matchedGrains.get(random.nextInt(matchedGrains.size()));
         }
         return null;
     }

@@ -21,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class GrainsManager {
 
-    private Map<Color, Grain> color2grain = new HashMap<>();
-    private List<Grain> grains = new ArrayList<>();
-    private List<Grain> inclusions = new ArrayList<>();
+    private Map<Color, GrainImpl> color2grain = new HashMap<>();
+    private List<GrainImpl> grains = new ArrayList<>();
+    private List<Inclusion> inclusions = new ArrayList<>();
 
     public List<Grain> createNeuclons(int count) {
         if (count < 0) {
@@ -72,28 +72,16 @@ public class GrainsManager {
         return inclusion;
     }
     
-    public List<Grain> getGrains() {
+    public List<GrainImpl> getGrains() {
         return grains;
     }
     
-    public List<Grain> getInclusions() {
+    public List<Inclusion> getInclusions() {
         return inclusions;
     }
     
-    public Grain getGrainByColor(Color color) {
+    public GrainImpl getGrainByColor(Color color) {
         return color2grain.get(color);
-    }
-    
-    /**
-     * This function gets 2 grains and merging them with each other. The smaller grain is absorbed by larger grain
-     * 
-     * @param first grain
-     * @param second grain
-     * @return remained grain
-     */
-    public Grain mergeGrains(Grain first, Grain second) {
-        //TODO:
-        return null;
     }
     
     private Color getRandomColor() {

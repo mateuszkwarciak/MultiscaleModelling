@@ -1,14 +1,17 @@
 package com.mk.multiscalemodeling.project1.simulation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
+import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -59,8 +62,37 @@ public class SimulationManager {
         }
     }
     
+    public boolean simulateGrowth(Neighbourhood neighbourhoodType) {
+        boolean hasGrown = false;
+        List<Pair<Cell, Grain>> cellsToUpdate = new ArrayList<>();
+         
+        for (int i = 1; i < dimX; i ++) {
+            for (int j = 1; j < dimY; j++) {
+                if (cells[i][j].getStatus().equals(CellStatus.EMPTY)) {
+                    Grain matchedGrain = neighbourhoodType.tryToMatchTheGrain(cells[i][j], cells);
+                    if (matchedGrain != null) {
+                        cellsToUpdate.add(Pair.of(cells[i][j], matchedGrain));
+                    }
+                }
+            }
+        }
+        
+        hasGrown = !cellsToUpdate.isEmpty();
+
+        cellsToUpdate.stream().forEach((e) -> {
+            updateCells(e.getLeft(), e.getRight());
+        });
+        
+        return hasGrown;
+    }
+    
     public Cell[][] getCells() {
         return cells;
+    }
+    
+    private void updateCells(Cell cellToUpdate, Grain grain) {
+        cellToUpdate.setGrain(grain);
+        cellToUpdate.setStatus(CellStatus.OCCUPIED);  
     }
     
     private void initCells() {
