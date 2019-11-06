@@ -5,11 +5,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
@@ -23,29 +22,24 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.converter.IntegerStringConverter;
-import javafx.util.converter.NumberStringConverter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StartController {
+@Component
+public class StartController implements Initializable{
 
 	@FXML private AnchorPane rootPane;
     @FXML private JFXButton newBtn;
@@ -53,7 +47,7 @@ public class StartController {
     @FXML private JFXButton optionsBtn;
     @FXML private JFXButton exitBtn;
     @FXML private StackPane dialogPane;
-
+ 
     private Stage popUpStage;
     
     private static final int MINIMUM_MATRIX_SIZE = 300;  
@@ -61,8 +55,14 @@ public class StartController {
     private static final String NEW_WINDOW_BODY = "Set simulation size:";
     private static final String NEW_WINDOW_ERROR = "Should be an integer greater then 299";
     
-    @Autowired
+    @Value("${project1.developModeEnabled}")
+    private boolean developModeEnabled;
+    
+    //@Autowired
     private SimulationManager simulationManager;
+    
+    //@Autowired
+    private SimulationController simulationController;
     
     @FXML
     void newAction(ActionEvent event) {
@@ -107,6 +107,11 @@ public class StartController {
         widthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         widthField.focusTraversableProperty().set(false);
         
+        if (developModeEnabled) {
+            hightField.setText("300");
+            widthField.setText("300");
+        }
+        
         JFXButton createBtn = new JFXButton("Create");
         JFXButton closeBtn = new JFXButton("Close");
         createBtn.focusTraversableProperty().set(false);
@@ -115,8 +120,8 @@ public class StartController {
         createBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             errorLbl.setText("");
             
-            int widthOfSimulation = readTextFieldValue(hightField);
-            int hightOfSimulation = readTextFieldValue(widthField);
+            int widthOfSimulation = readIntegerFromField(hightField);
+            int hightOfSimulation = readIntegerFromField(widthField);
 
             if (widthOfSimulation < MINIMUM_MATRIX_SIZE || hightOfSimulation < MINIMUM_MATRIX_SIZE) {
                 errorLbl.setText(NEW_WINDOW_ERROR);
@@ -126,8 +131,12 @@ public class StartController {
                 log.info("Start new simulation: ");
                 
                 simulationManager.init(SimulationStatus.NEW, widthOfSimulation, hightOfSimulation);
+                //simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
                 
                 goToSimulationScheme();
+                
+                simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
+                
                 closeStartWindow();
             }
         });
@@ -172,7 +181,6 @@ public class StartController {
 			public void handle(MouseEvent event) {
 				popUpStage.setX(event.getScreenX() - popUpWindowOffsetX);
 				popUpStage.setY(event.getScreenY() - popUpWindowOffsetY);
-
 			}
 		});
 
@@ -184,6 +192,7 @@ public class StartController {
     	try {
     		FXMLLoader fxmlLoader = new FXMLLoader();
         	fxmlLoader.setLocation(getClass().getResource("/fxml/simulation.fxml"));
+        	fxmlLoader.setController(simulationController);
         	
         	Stage simulationStage = new Stage();
 			Parent root = fxmlLoader.load();
@@ -191,15 +200,17 @@ public class StartController {
 			Scene simulationScene = new Scene(root);
 			
 			simulationStage.setTitle(JavaFxBridge.APPLICATION_TITLE);
+			simulationStage.setMinHeight(650);
+			simulationStage.setMinWidth(800);
 			simulationStage.setScene(simulationScene);
 			simulationStage.show();
-			
 		} catch (IOException e) {
 			log.warn("Error during opening simulation window: {}", e);
 		}
     }
             
-    private int readTextFieldValue(JFXTextField textField) {
+    private int readIntegerFromField(JFXTextField textField) {
+        //TODO add handling of textFormatter
     	String textFromField = textField.getText();
 
     	if (StringUtils.isEmpty(textFromField)) {
@@ -228,6 +239,12 @@ public class StartController {
         closeStartWindow();
         log.info("Closing program");
         Platform.exit();
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        simulationController = JavaFxBridge.applicationContext.getBean(SimulationController.class);
+        simulationManager = JavaFxBridge.applicationContext.getBean(SimulationManager.class);
     }
 
 }

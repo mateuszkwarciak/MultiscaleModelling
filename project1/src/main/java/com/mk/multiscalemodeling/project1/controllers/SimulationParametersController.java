@@ -3,18 +3,145 @@ package com.mk.multiscalemodeling.project1.controllers;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.fxml.Initializable;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXTextField;
+import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
+import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
+import com.mk.multiscalemodeling.project1.model.neighbourdhood.ShapeControl;
+import com.mk.multiscalemodeling.project1.model.neighbourdhood.VonNeuman;
+import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.TextFormatter;
+import javafx.util.Duration;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
 public class SimulationParametersController implements Initializable{
 
-    private SimulationController simulationController;
+    @FXML private JFXTextField noNucleonsField;
+    @FXML private JFXTextField noInclusionsField;
+    @FXML private JFXTextField sizeInclusionsField;
+    @FXML private JFXComboBox<?> typeInclusionsComboBox;
+    @FXML private JFXComboBox<String> neighbourhoodTypeComboBox;
+    @FXML private JFXSlider shapeRatioSlider;
     
+    private static final String VONNEUMAN_NEIGHBOURHOOD = "VonNeuman";
+    private static final String SHAPE_CONTROL_NEIGHBOURHOOD = "Shape Control";
+    
+    private Timeline timeline;
+    
+    private SimulationController simulationController;
+    private SimulationManager simulationManager;
+      
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // TODO Auto-generated method stub
+        simulationController = JavaFxBridge.applicationContext.getBean(SimulationController.class);
+        simulationManager = JavaFxBridge.applicationContext.getBean(SimulationManager.class);
         
+        noNucleonsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        noInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        sizeInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        
+        neighbourhoodTypeComboBox.getItems().addAll(VONNEUMAN_NEIGHBOURHOOD, SHAPE_CONTROL_NEIGHBOURHOOD);
+    }
+    
+    @FXML
+    void nucleatingAction(ActionEvent event) {
+        int numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
+        
+        // do not allow create more then 300 neuclons at once
+        if (numberOfNucleons > 300) {
+            noNucleonsField.setText("300");
+            return;
+        }
+        
+        simulationManager.addNucleonsToSimulation(numberOfNucleons);
+        simulationController.drawCellsOnCanvas();
+    }
+    
+    @FXML
+    void addInclusionsAction(ActionEvent event) {
+
     }
 
+    @FXML
+    void clearAction(ActionEvent event) {
+
+    }
+
+    @FXML
+    void startStepByStepAction(ActionEvent event) {
+        Neighbourhood selectedNeighborhood = getNeighbourhood();
+        if (selectedNeighborhood == null) {
+            log.warn("Cannot run simulation. Select neighbourhood");
+            return;
+        }
+        
+        KeyFrame simulation = new KeyFrame(Duration.seconds(1.0), (e) -> {
+            stepByStepSimulation(selectedNeighborhood);
+            simulationController.drawCellsOnCanvas();
+        });
+
+        timeline = new Timeline(simulation);
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+    
+    @FXML
+    void startImmediateAction(ActionEvent event) {
+        Neighbourhood selectedNeighborhood = getNeighbourhood();
+        if (selectedNeighborhood == null) {
+            log.warn("Cannot run simulation. Select neighbourhood");
+            return;
+        }
+        
+        int counter = 0;
+        while(simulationManager.simulateGrowth(selectedNeighborhood)) {
+            counter ++;
+            log.info("Processing grain growth. Iteration no: {}", counter);
+        }
+        log.info("End of simulation. Nuber of iteration: {}", counter);
+        
+        simulationController.drawCellsOnCanvas();
+    }
+    
+    private void stepByStepSimulation(Neighbourhood selectedNeighborhood) {
+        if(!simulationManager.simulateGrowth(selectedNeighborhood)) {
+            if (timeline != null) {
+                timeline.stop();
+            }
+        };
+    }
+
+    private Neighbourhood getNeighbourhood() {
+        String selectedNeighbourhoodType = neighbourhoodTypeComboBox.getSelectionModel().getSelectedItem();
+        if (StringUtils.isEmpty(selectedNeighbourhoodType)) {
+            //TODO add alert
+            return null;
+        }
+        
+        switch (selectedNeighbourhoodType) {
+        case VONNEUMAN_NEIGHBOURHOOD:
+            return new VonNeuman();
+        case SHAPE_CONTROL_NEIGHBOURHOOD:
+            int shapeControlRatio = (int) shapeRatioSlider.getValue();
+            return new ShapeControl(shapeControlRatio);
+        default:
+            return null;
+        }
+    }
+    
     void setSimulationController(SimulationController simulationController) {
         this.simulationController = simulationController;
     }
