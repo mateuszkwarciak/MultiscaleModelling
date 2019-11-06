@@ -14,6 +14,7 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.io.Export;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
@@ -31,7 +32,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -91,12 +92,14 @@ public class SimulationController implements Initializable {
         paneForCanvas.prefHeightProperty().bind(scrollPane.heightProperty());
         
         saveBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            
+            saveAction();
         });
         
         exitBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            generateExitAlert();
+            exitAction();
         });
+        
+
     }
         
     public void setCanvasSize(int width, int hight) { 
@@ -107,9 +110,18 @@ public class SimulationController implements Initializable {
         earseCanvas();
     }
     
-    public void drawCellsOnCanvas(Cell[][] cells) {
+    public void drawCellsOnCanvas() {
         earseCanvas();
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        draw(canvas, CELL_SIZE);
+    }
+    
+    private void drawToImage(Canvas canvasToImage) {
+        draw(canvasToImage, 1);
+    }
+    
+    private void draw(Canvas canvasToDraw, int cellSize) {
+        GraphicsContext gc = canvasToDraw.getGraphicsContext2D();
+        Cell[][] cells = simulationManager.getCells();
         
         // it starts from 1 to move away from the absorbing edge
         for (int i = 1; i < simulationManager.getDimX(); i++) {
@@ -118,7 +130,7 @@ public class SimulationController implements Initializable {
                 if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED)) {
                     gc.setFill(cells[i][j].getGrain().getColor());
                     // subtract 1 to avoid drawing white frame 
-                    gc.fillRect((i - 1) * CELL_SIZE, (j - 1) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    gc.fillRect((i - 1) * cellSize, (j - 1) * cellSize, cellSize, cellSize);
                 }   
             }
         }
@@ -130,7 +142,7 @@ public class SimulationController implements Initializable {
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
     
-    private void generateExitAlert() {
+    private void exitAction() {
         JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
         alert.initModality(Modality.APPLICATION_MODAL);
         
@@ -154,40 +166,42 @@ public class SimulationController implements Initializable {
         alert.show();
     }
     
-    private void prepareAndShowSaveAlert() {
-        //TODO
+    private void saveAction() {
         JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
         alert.initModality(Modality.APPLICATION_MODAL);
         
-        JFXDialogLayout layout = new JFXDialogLayout();
-        layout.setHeading(new Label("Save"));
-        HBox layoutBody = new HBox();
+        JFXButton saveAsTxtBtn = new JFXButton("Save as txt");
+        saveAsTxtBtn.setOnMouseClicked((e) -> {
+            
+        } );
         
-        
-        
-        JFXButton pathBtn = new JFXButton("Select path");
-             
-        pathBtn.setOnMouseClicked((e) -> {
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            File directoryToSave = directoryChooser.showDialog((Stage) scrollPane.getScene().getWindow());
+        JFXButton saveAsImageBtn = new JFXButton("Save as image");
+        saveAsImageBtn.setOnMouseClicked((e) -> {
+            Canvas canvasToSave = new Canvas(simulationManager.getDimX(), simulationManager.getDimY());
+            drawToImage(canvasToSave);
+            FileChooser fileChooser = new FileChooser(); //;
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*png"));
+            
+            File choosedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
+            if (choosedFile != null) {
+                try {
+                    Export.saveAsImage(canvasToSave, choosedFile);
+                    log.info("Simulation saved to: {}", choosedFile.getPath());
+                } catch (IOException ioe) {
+                    log.info("Error during saving simulation into image");
+                }
+                alert.close();
+            }
         });
-        
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        
-        layoutBody.getChildren().addAll(new Label("Chose location"), pathBtn);
-        layout.setBody(layoutBody);
-        
-        JFXButton yesBtn = new JFXButton("Yes");
-        yesBtn.setOnMouseClicked((e) -> {
-            Platform.exit();
-        });
-        
-        JFXButton noBtn = new JFXButton("No");
-        noBtn.setOnMouseClicked((e) -> {
+       
+        JFXButton cancelBtn = new JFXButton("Cancel");
+        cancelBtn.setOnMouseClicked((e) -> {
             alert.close();
         });
         
-        layout.setActions(yesBtn, noBtn);
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(new Label("Save simulation as:"));
+        layout.setActions(saveAsTxtBtn, saveAsImageBtn, cancelBtn);
         alert.setContent(layout);
         
         alert.show();
