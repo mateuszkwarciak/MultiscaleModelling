@@ -1,5 +1,6 @@
 package com.mk.multiscalemodeling.project1.simulation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +16,20 @@ import com.mk.multiscalemodeling.project1.model.GrainStatus;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
 
 import javafx.scene.paint.Color;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class GrainsManager {
+public class GrainsManager implements Serializable{
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     @Setter
+    @Getter
     private Map<Color, GrainImpl> color2grain = new HashMap<>();
     @Setter
     private List<GrainImpl> grains = new ArrayList<>();

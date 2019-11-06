@@ -33,7 +33,9 @@ dependencies {
 	compile "com.jfoenix:jfoenix:${jfoenixVersion}"
 
 	compile group: 'commons-io', name: 'commons-io', version: "${appacheCommonsVersion}"
-
+	
+	compile group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+	
     compile group: 'org.openjfx', name: 'javafx-graphics', version: "${openjfxVersion}"
 	compile group: 'org.openjfx', name: 'javafx-fxml', version: "${openjfxVersion}"
 	compile group: 'org.openjfx', name: 'javafx-base', version: "${openjfxVersion}"

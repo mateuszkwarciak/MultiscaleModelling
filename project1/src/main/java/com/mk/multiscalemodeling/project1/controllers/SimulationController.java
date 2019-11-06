@@ -31,7 +31,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -169,8 +168,22 @@ public class SimulationController implements Initializable {
         JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
         alert.initModality(Modality.APPLICATION_MODAL);
         
-        JFXButton saveAsTxtBtn = new JFXButton("Save as txt");
+        JFXButton saveAsTxtBtn = new JFXButton("Save as JSON");
         saveAsTxtBtn.setOnMouseClicked((e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json files (*.json)", "*json"));
+            Exporter exporter = new Exporter();
+            
+            File selectedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
+            if (selectedFile != null) {
+                try {
+                    exporter.saveAsJson(selectedFile);
+                    log.info("Simulation saved to: {}", selectedFile.getPath());
+                } catch (IOException ioe) {
+                    log.info("Error during saving simulation into image");
+                }
+                alert.close();
+            }
             
         } );
         
@@ -178,13 +191,15 @@ public class SimulationController implements Initializable {
         saveAsImageBtn.setOnMouseClicked((e) -> {
             Canvas canvasToSave = new Canvas(simulationManager.getDimX(), simulationManager.getDimY());
             drawToImage(canvasToSave);
+            Exporter exporter = new Exporter();
+            
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*png"));
             
             File selectedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
             if (selectedFile != null) {
                 try {
-                    Exporter.saveAsImage(canvasToSave, selectedFile);
+                    exporter.saveAsImage(canvasToSave, selectedFile);
                     log.info("Simulation saved to: {}", selectedFile.getPath());
                 } catch (IOException ioe) {
                     log.info("Error during saving simulation into image");
