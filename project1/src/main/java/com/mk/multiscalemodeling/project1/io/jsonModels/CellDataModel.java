@@ -4,8 +4,12 @@ import com.mk.multiscalemodeling.project1.model.CellStatus;
 
 import javafx.scene.paint.Color;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
 @AllArgsConstructor
+@Getter
+@ToString
 public class CellDataModel {
     int x;
     int y;

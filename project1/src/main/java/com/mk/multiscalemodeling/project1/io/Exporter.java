@@ -59,8 +59,10 @@ public class Exporter {
         for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
             for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
                 Cell cell = cells[i][j];
-                Color cellColor = (cell.getGrain() != null) ? cell.getGrain().getColor() : null;
-                dataModel.getCells().add(new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus()));
+                Color cellColor = (cell.getGrain() != null) ? cell.getGrain().getColor() : Cell.EMPTY_CELL_COLOR;
+       
+                CellDataModel cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus());
+                dataModel.getCells().add(cellDataModel);
             }
         }
         

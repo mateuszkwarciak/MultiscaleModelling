@@ -12,11 +12,11 @@ import lombok.ToString;
 @ToString
 public class JsonDataModel {
 
-    public int width;
-    public int hight;
+    int width;
+    int hight;
     
-    public List<Color> grainsColors;
+    List<Color> grainsColors;
     
-    public List<CellDataModel> cells;
+    List<CellDataModel> cells;
     
 }

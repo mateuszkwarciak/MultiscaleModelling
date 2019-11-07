@@ -219,14 +219,32 @@ public class StartController implements Initializable{
         });
         
         
-        JFXButton loadFromFile = new JFXButton("Load from file");
-        loadFromFile.setMinWidth(240.0);
+        JFXButton loadFromJson = new JFXButton("Load from JSON");
+        loadFromJson.setMinWidth(240.0);
         
-        loadFromFile.setOnMouseClicked((e) -> {
-            //TODO;
+        loadFromJson.setOnMouseClicked((e) -> {
+            Importer importer = new Importer();
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json files (*.json)", "*json"));
+            
+            File selectedFile = fileChooser.showOpenDialog(popUpStage);
+            if (selectedFile != null) {
+                try {
+                    importer.importFromJson(selectedFile);
+                    log.info("Start simulation from file {}", selectedFile.getName());
+                    
+                    goToSimulationScheme();
+                    simulationController.setCanvasSize(simulationManager.getDimX(), simulationManager.getDimY());
+                    simulationController.drawCellsOnCanvas();
+                    
+                    closeStartWindow();
+                } catch (IOException ioe) {
+                    log.warn("Cannot load simulation form file {}", selectedFile.getName());
+                }
+            }
         });
         
-        loadingWindowlayout.getChildren().addAll(headingText, loadFromPng, loadFromFile);
+        loadingWindowlayout.getChildren().addAll(headingText, loadFromPng, loadFromJson);
         
         JFXButton closeBtn = new JFXButton("Cancel");
         closeBtn.setOnMouseClicked((e) -> {
