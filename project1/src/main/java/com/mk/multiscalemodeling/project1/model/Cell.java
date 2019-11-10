@@ -1,5 +1,6 @@
 package com.mk.multiscalemodeling.project1.model;
 
+import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -7,6 +8,8 @@ import lombok.ToString;
 @ToString
 public class Cell {
 
+    public static final Color EMPTY_CELL_COLOR = Color.GHOSTWHITE;
+    
     @Getter 
     @Setter
     private CellStatus status;

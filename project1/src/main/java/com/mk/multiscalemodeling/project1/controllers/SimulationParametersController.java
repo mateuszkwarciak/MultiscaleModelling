@@ -11,6 +11,9 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
+import com.mk.multiscalemodeling.project1.model.InclusionShape.Circle;
+import com.mk.multiscalemodeling.project1.model.InclusionShape.InclusionType;
+import com.mk.multiscalemodeling.project1.model.InclusionShape.Square;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.ShapeControl;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.VonNeuman;
@@ -32,12 +35,15 @@ public class SimulationParametersController implements Initializable{
     @FXML private JFXTextField noNucleonsField;
     @FXML private JFXTextField noInclusionsField;
     @FXML private JFXTextField sizeInclusionsField;
-    @FXML private JFXComboBox<?> typeInclusionsComboBox;
+    @FXML private JFXComboBox<String> typeInclusionsComboBox;
     @FXML private JFXComboBox<String> neighbourhoodTypeComboBox;
     @FXML private JFXSlider shapeRatioSlider;
     
     private static final String VONNEUMAN_NEIGHBOURHOOD = "VonNeuman";
     private static final String SHAPE_CONTROL_NEIGHBOURHOOD = "Shape Control";
+    
+    private static final String INCLUSION_SQUARE = "Square";
+    private static final String INCLUSION_CIRCLE = "Circle";
     
     private Timeline timeline;
     
@@ -54,15 +60,20 @@ public class SimulationParametersController implements Initializable{
         sizeInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         
         neighbourhoodTypeComboBox.getItems().addAll(VONNEUMAN_NEIGHBOURHOOD, SHAPE_CONTROL_NEIGHBOURHOOD);
+        typeInclusionsComboBox.getItems().addAll(INCLUSION_SQUARE, INCLUSION_CIRCLE);    
     }
     
     @FXML
     void nucleatingAction(ActionEvent event) {
         int numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
         
+        if (numberOfNucleons == 0) {
+            return;
+        }
+        
         // do not allow create more then 300 neuclons at once
-        if (numberOfNucleons > 300) {
-            noNucleonsField.setText("300");
+        if (numberOfNucleons > 1000) {
+            noNucleonsField.setText("1000");
             return;
         }
         
@@ -72,7 +83,16 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void addInclusionsAction(ActionEvent event) {
-
+        int numberOfInclusions = (int) noInclusionsField.getTextFormatter().getValue();
+        int sizeOfInclusions = (int) sizeInclusionsField.getTextFormatter().getValue();
+        InclusionType inclusionShape = getInclusionShape();
+        
+        if (numberOfInclusions == 0 || sizeOfInclusions == 0 || inclusionShape == null) {
+            return;
+        }
+        
+        simulationManager.addInclusionsToSimulation(numberOfInclusions, sizeOfInclusions, inclusionShape);
+        simulationController.drawCellsOnCanvas();
     }
 
     @FXML
@@ -88,7 +108,7 @@ public class SimulationParametersController implements Initializable{
             return;
         }
         
-        KeyFrame simulation = new KeyFrame(Duration.seconds(1.0), (e) -> {
+        KeyFrame simulation = new KeyFrame(Duration.seconds(0.1), (e) -> {
             stepByStepSimulation(selectedNeighborhood);
             simulationController.drawCellsOnCanvas();
         });
@@ -137,6 +157,22 @@ public class SimulationParametersController implements Initializable{
         case SHAPE_CONTROL_NEIGHBOURHOOD:
             int shapeControlRatio = (int) shapeRatioSlider.getValue();
             return new ShapeControl(shapeControlRatio);
+        default:
+            return null;
+        }
+    }
+    
+    private InclusionType getInclusionShape() {
+        String selectedInclusionShape = typeInclusionsComboBox.getSelectionModel().getSelectedItem();
+        if (StringUtils.isEmpty(selectedInclusionShape)) {
+            return null;
+        }
+        
+        switch (selectedInclusionShape) {
+        case INCLUSION_SQUARE:
+            return new Square();
+        case INCLUSION_CIRCLE:
+            return new Circle(); 
         default:
             return null;
         }

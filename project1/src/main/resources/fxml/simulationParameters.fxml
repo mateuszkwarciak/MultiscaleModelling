@@ -47,7 +47,7 @@
             <Label alignment="CENTER" layoutX="17.0" layoutY="227.0" prefHeight="17.0" prefWidth="282.0" text="Inclusions" textAlignment="CENTER" />
             <JFXTextField fx:id="noInclusionsField" focusColor="#fdd835" layoutX="20.0" layoutY="255.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of inclusions" styleClass="jfx-text-field" />
             <JFXTextField fx:id="sizeInclusionsField" focusColor="#fdd835" layoutX="172.0" layoutY="255.0" prefHeight="25.0" prefWidth="127.0" promptText="Size of inclusions" styleClass="jfx-text-field" />
-            <JFXComboBox fx:id="typeInclusionsComboBox" layoutX="20.0" layoutY="298.0" prefHeight="25.0" prefWidth="127.0" promptText="Type of inclusions" styleClass="jfx-combobox" />
+            <JFXComboBox fx:id="typeInclusionsComboBox" layoutX="20.0" layoutY="298.0" prefHeight="25.0" prefWidth="127.0" promptText="Type of inclusions" styleClass="jfx-combobox" stylesheets="@../css/style.css" />
             <JFXButton buttonType="RAISED" layoutX="172.0" layoutY="298.0" onAction="#addInclusionsAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" text="Add inclusions" textAlignment="CENTER">
                <font>
                   <Font name="System Bold" size="12.0" />
@@ -55,7 +55,7 @@
             </JFXButton>
             <Separator layoutX="20.0" layoutY="339.0" prefHeight="2.0" prefWidth="282.0" />
             <Label alignment="CENTER" layoutX="20.0" layoutY="349.0" prefHeight="17.0" prefWidth="282.0" text="Neighbourhood options" textAlignment="CENTER" />
-            <JFXComboBox fx:id="neighbourhoodTypeComboBox" layoutX="20.0" layoutY="373.0" prefHeight="25.0" prefWidth="282.0" promptText="Type of neighbourhood" styleClass="jfx-combobox" />
+            <JFXComboBox fx:id="neighbourhoodTypeComboBox" layoutX="20.0" layoutY="373.0" prefHeight="25.0" prefWidth="282.0" promptText="Type of neighbourhood" styleClass="jfx-combobox" stylesheets="@../css/style.css" />
             <JFXSlider fx:id="shapeRatioSlider" layoutX="20.0" layoutY="437.0" prefWidth="282.0" />
             <Label alignment="TOP_LEFT" layoutX="20.0" layoutY="413.0" prefHeight="17.0" prefWidth="282.0" text="Shape control ratio" textAlignment="CENTER" />
          </children>

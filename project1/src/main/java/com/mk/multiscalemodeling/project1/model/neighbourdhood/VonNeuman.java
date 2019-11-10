@@ -1,16 +1,15 @@
 package com.mk.multiscalemodeling.project1.model.neighbourdhood;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
 
 public class VonNeuman implements Neighbourhood {
-
-    private Random random = new Random();
     
     @Override
     public Grain tryToMatchTheGrain(Cell targetCell, Cell[][] cells) {        
@@ -19,26 +18,41 @@ public class VonNeuman implements Neighbourhood {
         Cell down = cells[targetCell.getX()][targetCell.getY() + 1];
         Cell left = cells[targetCell.getX() + 1][targetCell.getY()];
         
-        List<Grain> matchedGrains = new ArrayList<>();
+        Map<Grain, AtomicInteger> grain2Count = new HashMap<>(); 
         if (up.getStatus().equals(CellStatus.OCCUPIED)) {
-            matchedGrains.add(up.getGrain());
+            increment(grain2Count, up.getGrain());
         }
         if (right.getStatus().equals(CellStatus.OCCUPIED)) {
-            matchedGrains.add(right.getGrain());
+            increment(grain2Count, right.getGrain());
         }
         if (down.getStatus().equals(CellStatus.OCCUPIED)) {
-            matchedGrains.add(down.getGrain());
+            increment(grain2Count, down.getGrain());
         }
         if (left.getStatus().equals(CellStatus.OCCUPIED)) {
-            matchedGrains.add(left.getGrain());
+            increment(grain2Count, left.getGrain());
         }
         
-        if (matchedGrains.size() == 1) {
-            return matchedGrains.get(0);
-        } else if (matchedGrains.size() > 1) {
-            return matchedGrains.get(random.nextInt(matchedGrains.size()));
+        if (grain2Count.size() > 0) {
+            Entry<Grain, AtomicInteger> mostOccurrences = grain2Count.entrySet().iterator().next();
+            for (Entry<Grain, AtomicInteger> entry: grain2Count.entrySet()) {
+                if (entry.getValue().get() > mostOccurrences.getValue().get()) {
+                    mostOccurrences = entry;
+                }
+            }
+            return mostOccurrences.getKey();
         }
+        
         return null;
+    }
+    
+    private void increment(Map<Grain, AtomicInteger> grain2Count, Grain grainToAdd) {
+        AtomicInteger numberOfoOccurrences = grain2Count.get(grainToAdd);
+        if (numberOfoOccurrences == null) {
+            grain2Count.put(grainToAdd, new AtomicInteger(1));
+            return;
+        }
+        numberOfoOccurrences.incrementAndGet();
+        
     }
 
 }

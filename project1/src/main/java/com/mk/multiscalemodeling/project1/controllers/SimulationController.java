@@ -14,7 +14,7 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
-import com.mk.multiscalemodeling.project1.io.Export;
+import com.mk.multiscalemodeling.project1.io.Exporter;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
@@ -31,7 +31,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -52,7 +51,6 @@ public class SimulationController implements Initializable {
     private SimulationParametersController parametersController;
     private SimulationManager simulationManager;
 
-    private Color CANVAS_BACKGROUND = Color.GHOSTWHITE;
     private int CELL_SIZE = 3;
     
     @Override
@@ -124,10 +122,10 @@ public class SimulationController implements Initializable {
         Cell[][] cells = simulationManager.getCells();
         
         // it starts from 1 to move away from the absorbing edge
-        for (int i = 1; i < simulationManager.getDimX(); i++) {
-            for (int j = 1; j < simulationManager.getDimY(); j++) {
+        for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
+            for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
                 // draw if cell not empty
-                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED)) {
+                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED) || cells[i][j].getStatus().equals(CellStatus.INCLUSION)) {
                     gc.setFill(cells[i][j].getGrain().getColor());
                     // subtract 1 to avoid drawing white frame 
                     gc.fillRect((i - 1) * cellSize, (j - 1) * cellSize, cellSize, cellSize);
@@ -138,7 +136,7 @@ public class SimulationController implements Initializable {
     
     private void earseCanvas() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setFill(CANVAS_BACKGROUND);
+        gc.setFill(Cell.EMPTY_CELL_COLOR);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
     
@@ -170,8 +168,22 @@ public class SimulationController implements Initializable {
         JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
         alert.initModality(Modality.APPLICATION_MODAL);
         
-        JFXButton saveAsTxtBtn = new JFXButton("Save as txt");
+        JFXButton saveAsTxtBtn = new JFXButton("Save as JSON");
         saveAsTxtBtn.setOnMouseClicked((e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json files (*.json)", "*json"));
+            Exporter exporter = new Exporter();
+            
+            File selectedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
+            if (selectedFile != null) {
+                try {
+                    exporter.saveAsJson(selectedFile);
+                    log.info("Simulation saved to: {}", selectedFile.getPath());
+                } catch (IOException ioe) {
+                    log.info("Error during saving simulation into image");
+                }
+                alert.close();
+            }
             
         } );
         
@@ -179,14 +191,16 @@ public class SimulationController implements Initializable {
         saveAsImageBtn.setOnMouseClicked((e) -> {
             Canvas canvasToSave = new Canvas(simulationManager.getDimX(), simulationManager.getDimY());
             drawToImage(canvasToSave);
-            FileChooser fileChooser = new FileChooser(); //;
+            Exporter exporter = new Exporter();
+            
+            FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*png"));
             
-            File choosedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
-            if (choosedFile != null) {
+            File selectedFile = fileChooser.showSaveDialog((Stage) scrollPane.getScene().getWindow());
+            if (selectedFile != null) {
                 try {
-                    Export.saveAsImage(canvasToSave, choosedFile);
-                    log.info("Simulation saved to: {}", choosedFile.getPath());
+                    exporter.saveAsImage(canvasToSave, selectedFile);
+                    log.info("Simulation saved to: {}", selectedFile.getPath());
                 } catch (IOException ioe) {
                     log.info("Error during saving simulation into image");
                 }

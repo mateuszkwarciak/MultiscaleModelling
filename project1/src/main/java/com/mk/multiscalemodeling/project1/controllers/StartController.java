@@ -1,5 +1,6 @@
 package com.mk.multiscalemodeling.project1.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -12,6 +13,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.controllers.utils.PositiveIntegerStringConverter;
+import com.mk.multiscalemodeling.project1.io.Importer;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 import com.mk.multiscalemodeling.project1.simulation.SimulationStatus;
 
@@ -32,6 +34,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -54,14 +57,12 @@ public class StartController implements Initializable{
     private static final String NEW_WINDOW_HEADER = "New configuration";
     private static final String NEW_WINDOW_BODY = "Set simulation size:";
     private static final String NEW_WINDOW_ERROR = "Should be an integer greater then 299";
+    private static final String LOAD_WINDOW_HEADER = "Load simulation:";
     
     @Value("${project1.developModeEnabled}")
     private boolean developModeEnabled;
     
-    //@Autowired
     private SimulationManager simulationManager;
-    
-    //@Autowired
     private SimulationController simulationController;
     
     @FXML
@@ -71,7 +72,7 @@ public class StartController implements Initializable{
     
     @FXML
     void loadAction(ActionEvent event) {
-    	
+        prepareAndShowLoadWindow();
     }
 
     @FXML
@@ -113,7 +114,7 @@ public class StartController implements Initializable{
         }
         
         JFXButton createBtn = new JFXButton("Create");
-        JFXButton closeBtn = new JFXButton("Close");
+        JFXButton closeBtn = new JFXButton("Cancel");
         createBtn.focusTraversableProperty().set(false);
         closeBtn.focusTraversableProperty().set(false);
         
@@ -131,10 +132,7 @@ public class StartController implements Initializable{
                 log.info("Start new simulation: ");
                 
                 simulationManager.init(SimulationStatus.NEW, widthOfSimulation, hightOfSimulation);
-                //simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
-                
                 goToSimulationScheme();
-                
                 simulationController.setCanvasSize(widthOfSimulation, hightOfSimulation);
                 
                 closeStartWindow();
@@ -142,7 +140,7 @@ public class StartController implements Initializable{
         });
         
         closeBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            log.debug("PopUpWindow closed");
+            log.debug("New simulation window closed");
             popUpStage.close();
         });
 
@@ -188,6 +186,83 @@ public class StartController implements Initializable{
 		popUpStage.show();
     }
     
+    public void prepareAndShowLoadWindow() {
+        VBox loadingWindowlayout = new VBox();
+        loadingWindowlayout.setPadding(new Insets(20, 30, 20, 30));
+        loadingWindowlayout.setSpacing(15.0);
+        
+        Text headingText = new Text(LOAD_WINDOW_HEADER);
+        
+        JFXButton loadFromPng = new JFXButton("Load from image");
+        loadFromPng.setMinWidth(240.0);
+        
+        loadFromPng.setOnMouseClicked((e) -> {
+            Importer importer = new Importer();
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*png"));
+            
+            File selectedFile = fileChooser.showOpenDialog(popUpStage);
+            if (selectedFile != null) {
+                try {
+                    importer.importFromImage(selectedFile);
+                    log.info("Start simulation from file {}", selectedFile.getName());
+                    
+                    goToSimulationScheme();
+                    simulationController.setCanvasSize(simulationManager.getDimX(), simulationManager.getDimY());
+                    simulationController.drawCellsOnCanvas();
+                    
+                    closeStartWindow();
+                } catch (IOException ioe) {
+                    log.warn("Cannot load simulation form file {}", selectedFile.getName());
+                }
+            }
+        });
+        
+        
+        JFXButton loadFromJson = new JFXButton("Load from JSON");
+        loadFromJson.setMinWidth(240.0);
+        
+        loadFromJson.setOnMouseClicked((e) -> {
+            Importer importer = new Importer();
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("json files (*.json)", "*json"));
+            
+            File selectedFile = fileChooser.showOpenDialog(popUpStage);
+            if (selectedFile != null) {
+                try {
+                    importer.importFromJson(selectedFile);
+                    log.info("Start simulation from file {}", selectedFile.getName());
+                    
+                    goToSimulationScheme();
+                    simulationController.setCanvasSize(simulationManager.getDimX(), simulationManager.getDimY());
+                    simulationController.drawCellsOnCanvas();
+                    
+                    closeStartWindow();
+                } catch (IOException ioe) {
+                    log.warn("Cannot load simulation form file {}", selectedFile.getName());
+                }
+            }
+        });
+        
+        loadingWindowlayout.getChildren().addAll(headingText, loadFromPng, loadFromJson);
+        
+        JFXButton closeBtn = new JFXButton("Cancel");
+        closeBtn.setOnMouseClicked((e) -> {
+            log.debug("Load simulation window closed");
+            popUpStage.close();
+        });
+        
+        AnchorPane buttonPane = new AnchorPane();
+        buttonPane.setPrefHeight(100);
+        buttonPane.getChildren().addAll(closeBtn);
+        
+        AnchorPane.setRightAnchor(closeBtn, 0.0);
+        AnchorPane.setBottomAnchor(closeBtn, 11.0);
+        loadingWindowlayout.getChildren().add(buttonPane);
+        
+        displayPopUpWindow(loadingWindowlayout, 300, 200);
+    }
+    
     private void goToSimulationScheme() {	
     	try {
     		FXMLLoader fxmlLoader = new FXMLLoader();
@@ -230,7 +305,9 @@ public class StartController implements Initializable{
     
     private void closeStartWindow() {
         log.info("Closing StartWindow");
-        popUpStage.close();
+        if (popUpStage != null) {
+            popUpStage.close();
+        }
         Stage rootStage = (Stage) rootPane.getScene().getWindow();
         rootStage.close();
     }

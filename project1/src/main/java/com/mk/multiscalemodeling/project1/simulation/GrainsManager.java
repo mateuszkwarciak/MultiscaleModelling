@@ -15,15 +15,26 @@ import com.mk.multiscalemodeling.project1.model.GrainStatus;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
 
 import javafx.scene.paint.Color;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class GrainsManager {
 
+    //TODO: merge color2grain and grains into one collection
+    @Setter
+    @Getter
     private Map<Color, GrainImpl> color2grain = new HashMap<>();
+    @Setter
     private List<GrainImpl> grains = new ArrayList<>();
+    //TODO: merge inclusions and id2Inclusion into one collection
+    @Setter
     private List<Inclusion> inclusions = new ArrayList<>();
+    @Setter
+    @Getter
+    private Map<String, Inclusion> id2Inclusion = new HashMap<>();
 
     public List<Grain> createNeuclons(int count) {
         if (count < 0) {
@@ -44,7 +55,7 @@ public class GrainsManager {
             neuclonColor = getRandomColor();
         }
         
-        GrainImpl neuclon = new GrainImpl(GrainStatus.NEUCLON, neuclonColor);
+        GrainImpl neuclon = new GrainImpl(GrainStatus.GRAIN, neuclonColor);
         
         color2grain.put(neuclonColor, neuclon);
         grains.add(neuclon);
@@ -52,22 +63,23 @@ public class GrainsManager {
         return neuclon;
     }
     
-    public List<Grain> createInclusion(int count) {
+    public List<Inclusion> createInclusion(int count) {
         if (count < 0) {
             log.warn("Wrong number of inclusions to add ({})", count);
         }
         
-        List<Grain> inclusions = new ArrayList<>();
-        IntStream.rangeClosed(0, count).forEach(e -> {
+        List<Inclusion> inclusions = new ArrayList<>();
+        IntStream.rangeClosed(0, count - 1).forEach(e -> {
             inclusions.add(createInclusion());
         });
         
         return inclusions;
     }
     
-    public Grain createInclusion() {        
+    public Inclusion createInclusion() {        
         Inclusion inclusion = new Inclusion();
         inclusions.add(inclusion);
+        id2Inclusion.put(inclusion.getInclusionId(), inclusion);
         
         return inclusion;
     }
