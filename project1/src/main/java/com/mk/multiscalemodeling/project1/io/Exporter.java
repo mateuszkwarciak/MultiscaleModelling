@@ -12,8 +12,10 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.gson.Gson;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.io.jsonModels.CellDataModel;
-import com.mk.multiscalemodeling.project1.io.jsonModels.JsonDataModel;
+import com.mk.multiscalemodeling.project1.io.jsonModels.JsonSImulationModel;
 import com.mk.multiscalemodeling.project1.model.Cell;
+import com.mk.multiscalemodeling.project1.model.CellStatus;
+import com.mk.multiscalemodeling.project1.model.Inclusion;
 import com.mk.multiscalemodeling.project1.simulation.GrainsManager;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 
@@ -49,11 +51,12 @@ public class Exporter {
             file = new File(file.toString() + ".json");
         }
         
-        JsonDataModel dataModel = new JsonDataModel();
-        dataModel.setWidth(simulationManager.getDimX());
-        dataModel.setHight(simulationManager.getDimY());
-        dataModel.setGrainsColors(new ArrayList<>(grainsManager.getColor2grain().keySet()));
-        dataModel.setCells(new ArrayList<>());
+        JsonSImulationModel dataToSave = new JsonSImulationModel();
+        dataToSave.setWidth(simulationManager.getDimX());
+        dataToSave.setHight(simulationManager.getDimY());
+        dataToSave.setGrainsColors(new ArrayList<>(grainsManager.getColor2grain().keySet()));
+        dataToSave.setInclusionsId(new ArrayList<>(grainsManager.getId2Inclusion().keySet()));
+        dataToSave.setCells(new ArrayList<>());
         
         Cell[][] cells = simulationManager.getCells();
         for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
@@ -61,12 +64,19 @@ public class Exporter {
                 Cell cell = cells[i][j];
                 Color cellColor = (cell.getGrain() != null) ? cell.getGrain().getColor() : Cell.EMPTY_CELL_COLOR;
        
-                CellDataModel cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus());
-                dataModel.getCells().add(cellDataModel);
+                CellDataModel cellDataModel;
+                if (cell.getStatus().equals(CellStatus.INCLUSION)) {
+                    cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), 
+                            ((Inclusion) cell.getGrain()).getInclusionId());
+                } else {
+                    cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), null);
+                }
+                
+                dataToSave.getCells().add(cellDataModel);
             }
         }
         
-        String json = new Gson().toJson(dataModel);
+        String json = new Gson().toJson(dataToSave);
         
         PrintWriter writer = new PrintWriter(file);
         writer.println(json);

@@ -122,10 +122,10 @@ public class SimulationController implements Initializable {
         Cell[][] cells = simulationManager.getCells();
         
         // it starts from 1 to move away from the absorbing edge
-        for (int i = 1; i < simulationManager.getDimX(); i++) {
-            for (int j = 1; j < simulationManager.getDimY(); j++) {
+        for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
+            for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
                 // draw if cell not empty
-                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED)) {
+                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED) || cells[i][j].getStatus().equals(CellStatus.INCLUSION)) {
                     gc.setFill(cells[i][j].getGrain().getColor());
                     // subtract 1 to avoid drawing white frame 
                     gc.fillRect((i - 1) * cellSize, (j - 1) * cellSize, cellSize, cellSize);

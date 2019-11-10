@@ -31,8 +31,5 @@ public class GrainImpl extends Grain {
     public void setColor(Color color) {
         this.color = color;
     }
-    
-  
-  
 
 }

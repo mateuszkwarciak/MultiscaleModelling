@@ -11,6 +11,8 @@ import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
+import com.mk.multiscalemodeling.project1.model.Inclusion;
+import com.mk.multiscalemodeling.project1.model.InclusionShape.InclusionType;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
 
 import lombok.Getter;
@@ -26,8 +28,13 @@ public class SimulationManager {
     private SimulationStatus simulationStatus;
     private GrainsManager grainsManager;
     
-    @Getter private int dimX;
-    @Getter private int dimY;
+    @Getter 
+    private int dimX;
+    @Getter 
+    private int dimY;
+    
+    @Getter
+    private boolean fullGrown;
     
     @Getter
     @Setter
@@ -69,12 +76,70 @@ public class SimulationManager {
         }
     }
     
+    public void addInclusionsToSimulation(int count, int sizeOfInclusion, InclusionType shape) {
+        log.info("Adding {} inclusions to simulation", count);
+        
+        Random rand = new Random();
+        List<Inclusion> inclusions = grainsManager.createInclusion(count);
+        
+        log.info("Zajete {}", checkIfFullyGrown());
+        
+        while (!inclusions.isEmpty()) {
+            // add 1 to move away from the absorbing edge
+            int randomX = 1 + rand.nextInt(dimX);
+            int randomY = 1 + rand.nextInt(dimY);
+            log.info("LOSU LOSU");
+            Cell selectedCell = cells[randomX][randomY];
+            if (selectedCell.getStatus().equals(CellStatus.EMPTY)) {
+                shape.genearteInclusion(selectedCell, inclusions.remove(0), sizeOfInclusion);
+                log.debug("Adding inclusions to simulation(on empty cell) ({}, {})", randomX, randomY);
+            } else if (selectedCell.getStatus().equals(CellStatus.OCCUPIED)) {
+                if (checkIfOnGrainsEdge(selectedCell)) {
+                    shape.genearteInclusion(selectedCell, inclusions.remove(0), sizeOfInclusion);
+                    log.debug("Adding inclusions to simulation (on grains edge) ({}, {})", randomX, randomY);
+                }
+            }
+
+            log.trace("Inclusion added to cell array ({},{})", randomX, randomY);
+        }
+
+    }
+    
+    private boolean checkIfOnGrainsEdge(Cell cellToCheck) {
+        int x = cellToCheck.getX();
+        int y = cellToCheck.getY();
+        
+        if (cellToCheck.getGrain() == null) {
+            return false;
+        } 
+        
+        Grain grain = cellToCheck.getGrain();
+        for (int i = (x - 1); i <= (x + 1); i++) {
+            for (int j = (y - 1); j <= (y + 1); j++) {
+                if ((i == x && y == j) || !isInSimulationRange(i, j) ) {
+                    continue;
+                }
+
+                Cell cell = cells[i][j];
+                if (cell.getStatus().equals(CellStatus.ABSORBING) || cell.getStatus().equals(CellStatus.INCLUSION)) {
+                    continue;
+                }
+                
+                if (cell.getStatus().equals(CellStatus.EMPTY) || (!cell.getGrain().equals(grain))) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    } 
+    
     public boolean simulateGrowth(Neighbourhood neighbourhoodType) {
         boolean hasGrown = false;
         List<Pair<Cell, Grain>> cellsToUpdate = new ArrayList<>();
          
-        for (int i = 1; i < dimX; i ++) {
-            for (int j = 1; j < dimY; j++) {
+        for (int i = 1; i < dimX + 1; i ++) {
+            for (int j = 1; j < dimY + 1; j++) {
                 if (cells[i][j].getStatus().equals(CellStatus.EMPTY)) {
                     Grain matchedGrain = neighbourhoodType.tryToMatchTheGrain(cells[i][j], cells);
                     if (matchedGrain != null) {
@@ -85,7 +150,7 @@ public class SimulationManager {
         }
         
         hasGrown = !cellsToUpdate.isEmpty();
-
+        
         cellsToUpdate.stream().forEach((e) -> {
             updateCells(e.getLeft(), e.getRight());
         });
@@ -93,9 +158,26 @@ public class SimulationManager {
         return hasGrown;
     }
     
+    public boolean isInSimulationRange(int i, int j) {
+        return ((i > 0) && (i < (dimX + 2)) && (j > 0) && (j < (dimY + 2)));
+    }
+    
     private void updateCells(Cell cellToUpdate, Grain grain) {
         cellToUpdate.setGrain(grain);
-        cellToUpdate.setStatus(CellStatus.OCCUPIED);  
+        cellToUpdate.setStatus(CellStatus.OCCUPIED);      
+    }
+    
+    private boolean checkIfFullyGrown() {
+        boolean emptyCell = false;
+        for (int i = 1; i <+ dimX; i ++) {
+            for (int j = 1; j <+ dimY; j++) {
+                if (cells[i][j].getStatus().equals(CellStatus.EMPTY)) {
+                    emptyCell = true;
+                }
+            }
+        }
+        
+        return fullGrown = !emptyCell;
     }
     
     private void initCells() {

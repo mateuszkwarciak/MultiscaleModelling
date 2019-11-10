@@ -13,7 +13,7 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
-import com.mk.multiscalemodeling.project1.io.jsonModels.JsonDataModel;
+import com.mk.multiscalemodeling.project1.io.jsonModels.JsonSImulationModel;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
@@ -118,24 +118,28 @@ public class Importer {
         
         String json = stringBuilder.toString();
         
-        JsonDataModel dataModel = new Gson().fromJson(json, JsonDataModel.class);
+        JsonSImulationModel dataToImport = new Gson().fromJson(json, JsonSImulationModel.class);
         
         Map<Color, GrainImpl> color2grain = new HashMap<>();
         List<GrainImpl> grains = new ArrayList<>();
-        
+        Map<String, Inclusion> id2Inclusion = new HashMap<>();
         List<Inclusion> inclusions = new ArrayList<>();
-        Inclusion collectiveInclusion = new Inclusion();
-        inclusions.add(collectiveInclusion);
         
-        int width = (int) dataModel.getWidth();
-        int hight = (int) dataModel.getHight();
+        int width = (int) dataToImport.getWidth();
+        int hight = (int) dataToImport.getHight();
         log.info("Loading simulation with parameters width: {} hight: {}", width, hight);
         
-        dataModel.getGrainsColors().stream().forEach((e) -> {
+        dataToImport.getGrainsColors().stream().forEach((e) -> {
             Color loadedColor = Color.color(e.getRed(), e.getGreen(), e.getBlue());
             GrainImpl grain = new GrainImpl(GrainStatus.GRAIN, loadedColor);
             color2grain.put(loadedColor, grain);
             grains.add(grain);
+        });
+        
+        dataToImport.getInclusionsId().stream().forEach((e) -> {
+            Inclusion inclusion = new Inclusion(e);
+            inclusions.add(inclusion);
+            id2Inclusion.put(e, inclusion);
         });
         
         Cell cells[][] = new Cell[width + 2][hight + 2];
@@ -147,20 +151,19 @@ public class Importer {
             }
         }
         
-        dataModel.getCells().stream().forEach((e) -> {
+        dataToImport.getCells().stream().forEach((e) -> {
             int x = e.getX();
             int y = e.getY();
             Cell cell = new Cell(e.getStatus(), x, y);
             
-            if(e.getStatus().equals(CellStatus.OCCUPIED)) {
-                Color color = Color.color(e.getColor().getRed(), e.getColor().getGreen(), e.getColor().getBlue());
-                //Inclusion
-                if (color.equals(Inclusion.COLOR)) {
-                    cell.setGrain(collectiveInclusion);
+            if (e.getStatus().equals(CellStatus.OCCUPIED)) {
                 //Grain
-                } else {
-                    cell.setGrain(color2grain.get(color));
-                }
+                Color color = Color.color(e.getColor().getRed(), e.getColor().getGreen(), e.getColor().getBlue());
+                cell.setGrain(color2grain.get(color)); 
+            } else if (e.getStatus().equals(CellStatus.INCLUSION)) {
+                //Inclusion
+                Inclusion inclusion = id2Inclusion.get(e.getInclusionId());
+                cell.setGrain(inclusion);
             }
             
             cells[x][y] = cell;
