@@ -15,7 +15,8 @@ public class JsonSImulationModel {
     int width;
     int hight;
     
-    List<Color> grainsColors;
+    List<GrainDataModel> grains;
+    //List<Color> grainsColors;
     List<String> inclusionsId;
     List<CellDataModel> cells;
     

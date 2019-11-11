@@ -38,6 +38,18 @@
 }
 
 /*
+	Hamburger
+*/
+
+.jfx-hamburger {
+	-fx-background-color: #fdd835;
+}
+
+.jfx-hamburger StackPane {
+	-fx-background-color: white;
+}
+
+/*
 	Slider CSS
 */
 

@@ -17,6 +17,9 @@ import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.io.Exporter;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
+import com.mk.multiscalemodeling.project1.model.Grain;
+import com.mk.multiscalemodeling.project1.model.GrainImpl;
+import com.mk.multiscalemodeling.project1.model.GrainStatus;
 import com.mk.multiscalemodeling.project1.simulation.SimulationManager;
 
 import javafx.application.Platform;
@@ -29,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -48,6 +52,7 @@ public class SimulationController implements Initializable {
     @FXML private JFXDrawer parametersPane;
     @FXML private Canvas canvas;
     
+    
     private SimulationParametersController parametersController;
     private SimulationManager simulationManager;
 
@@ -62,9 +67,12 @@ public class SimulationController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/simulationParameters.fxml"));
             loader.setController(parametersController);
             
-            ScrollPane mainPaneForParameters = (ScrollPane) loader.load();
+            AnchorPane mainPaneForParameters = (AnchorPane) loader.load();
 
-            parametersPane.setSidePane(mainPaneForParameters);
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setContent(mainPaneForParameters);
+            
+            parametersPane.setSidePane(scrollPane);
 
         } catch (IOException e) {
             log.error("Error during controller initialization. {}", e);
@@ -88,6 +96,23 @@ public class SimulationController implements Initializable {
         
         paneForCanvas.prefWidthProperty().bind(scrollPane.widthProperty());
         paneForCanvas.prefHeightProperty().bind(scrollPane.heightProperty());
+        
+        canvas.setOnMouseClicked((e) -> {
+            int x = (int) e.getX() / CELL_SIZE;
+            int y = (int) e.getY() / CELL_SIZE;
+            x++;
+            y++;
+            
+            Cell selectedCell = simulationManager.getCells()[x][y];
+            log.info("Selected cell {}", selectedCell.toString());
+            if (parametersController.getEditModeStatus()) {
+                Grain selectedGrain = selectedCell.getGrain();
+                if (selectedGrain != null && !selectedGrain.getStatus().equals(GrainStatus.INCLUSION)) {
+                    parametersController.addSelectedGrain((GrainImpl) selectedGrain);
+                }
+            }
+            
+        });
         
         saveBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             saveAction();
@@ -220,4 +245,70 @@ public class SimulationController implements Initializable {
         
         alert.show();
     }
+
+    public void clearAlert() {
+        JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
+        alert.initModality(Modality.APPLICATION_MODAL);
+        
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(new Label("Clear"));
+        
+        JFXButton clearAll = new JFXButton("Clear all");
+        clearAll.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Clear All action");
+            parametersController.clearListOfSelectedGrains();
+            simulationManager.clearSimulation();
+            drawCellsOnCanvas();
+            alert.close();
+        });
+        
+        JFXButton removeSelected = new JFXButton("Remove selected");
+        removeSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Clear selected action");
+            parametersController.removeSelectedGrainsFromSimulation();
+            parametersController.clearListOfSelectedGrains();
+            drawCellsOnCanvas();
+            alert.close();
+        });
+        
+        JFXButton removeNotSelected = new JFXButton("Remove not selected");
+        removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Clear not selected action");
+            parametersController.removeAllGrainsExceptSelected();
+            drawCellsOnCanvas();
+            alert.close();
+        });
+        
+        JFXButton cancel = new JFXButton("Cancel");
+        cancel.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Clear Cancel action");
+            alert.close();
+        });
+        
+        layout.setActions(clearAll, removeSelected, removeNotSelected, cancel);
+        alert.setContent(layout);
+        
+        alert.show();
+    }
+    
+    
+    public void showAlert(String heading, String message) {
+        JFXAlert<String> alert = new JFXAlert<>((Stage) scrollPane.getScene().getWindow());
+        alert.initModality(Modality.APPLICATION_MODAL);
+        
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(new Label(heading));
+        layout.setBody(new HBox(new Label(message)));
+        
+        JFXButton okBtn = new JFXButton("OK=k");
+        okBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            alert.close();
+        });
+
+        layout.setActions(okBtn);
+        alert.setContent(layout);
+        
+        alert.show();
+    }
+    
 }

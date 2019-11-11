@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -12,6 +13,7 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.gson.Gson;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.io.jsonModels.CellDataModel;
+import com.mk.multiscalemodeling.project1.io.jsonModels.GrainDataModel;
 import com.mk.multiscalemodeling.project1.io.jsonModels.JsonSImulationModel;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
@@ -50,14 +52,17 @@ public class Exporter {
         if (!FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("json")) {
             file = new File(file.toString() + ".json");
         }
-        
+        log.info("1");
         JsonSImulationModel dataToSave = new JsonSImulationModel();
         dataToSave.setWidth(simulationManager.getDimX());
         dataToSave.setHight(simulationManager.getDimY());
-        dataToSave.setGrainsColors(new ArrayList<>(grainsManager.getColor2grain().keySet()));
+        log.info("2");
+        dataToSave.setGrains(grainsManager.getGrains().stream().map((e) -> new GrainDataModel(e.getColor(), e.getStatus()))
+                .collect(Collectors.toList()));
+        log.info("2.5");
         dataToSave.setInclusionsId(new ArrayList<>(grainsManager.getId2Inclusion().keySet()));
         dataToSave.setCells(new ArrayList<>());
-        
+        log.info("3");
         Cell[][] cells = simulationManager.getCells();
         for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
             for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
