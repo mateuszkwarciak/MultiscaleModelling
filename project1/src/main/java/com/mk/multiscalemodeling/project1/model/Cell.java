@@ -33,10 +33,20 @@ public class Cell {
     
     public void setGrain(Grain grain) {
         if (this.grain != null) {
-            grain.deregisterCell(this);
+            this.grain.deregisterCell(this);
         }
         
         this.grain = grain;
-        this.grain.registerCell(this);
+        if (this.grain != null) {
+            this.grain.registerCell(this);
+        }
+        
+    }
+    
+    public void removeFromGrain() {
+        if (grain != null) {
+            grain.deregisterCell(this);
+            status = CellStatus.EMPTY;
+        }
     }
 }

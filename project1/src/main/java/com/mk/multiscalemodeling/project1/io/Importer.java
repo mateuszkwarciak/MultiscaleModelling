@@ -129,9 +129,10 @@ public class Importer {
         int hight = (int) dataToImport.getHight();
         log.info("Loading simulation with parameters width: {} hight: {}", width, hight);
         
-        dataToImport.getGrainsColors().stream().forEach((e) -> {
-            Color loadedColor = Color.color(e.getRed(), e.getGreen(), e.getBlue());
-            GrainImpl grain = new GrainImpl(GrainStatus.GRAIN, loadedColor);
+        dataToImport.getGrains().stream().forEach((e) -> {
+            GrainStatus status = e.getGrainStatus();
+            Color loadedColor = Color.color(e.getColor().getRed(), e.getColor().getGreen(), e.getColor().getBlue());
+            GrainImpl grain = new GrainImpl(status, loadedColor);
             color2grain.put(loadedColor, grain);
             grains.add(grain);
         });

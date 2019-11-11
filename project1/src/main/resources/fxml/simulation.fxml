@@ -15,8 +15,8 @@
    <children>
       <AnchorPane prefHeight="50.0" style="-fx-background-color: #fdd835;" stylesheets="@../css/style.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <JFXHamburger fx:id="parametersBtn" layoutX="21.0" layoutY="18.0" AnchorPane.leftAnchor="21.0" AnchorPane.topAnchor="18.0" />
-            <Label layoutX="67.0" layoutY="5.0" prefHeight="40.0" prefWidth="140.0" text="Kryształki" AnchorPane.leftAnchor="67.0" AnchorPane.topAnchor="5.0">
+            <JFXHamburger fx:id="parametersBtn" layoutX="21.0" layoutY="9.0" prefWidth="30.0" stylesheets="@../css/style.css" AnchorPane.leftAnchor="21.0" AnchorPane.topAnchor="18.0" />
+            <Label layoutX="67.0" layoutY="5.0" prefHeight="40.0" prefWidth="140.0" text="Kryształki" textFill="WHITE" AnchorPane.leftAnchor="67.0" AnchorPane.topAnchor="5.0">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>

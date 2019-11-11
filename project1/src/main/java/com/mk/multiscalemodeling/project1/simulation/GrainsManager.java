@@ -5,10 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Component;
 
+import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
 import com.mk.multiscalemodeling.project1.model.GrainStatus;
@@ -94,6 +98,80 @@ public class GrainsManager {
     
     public GrainImpl getGrainByColor(Color color) {
         return color2grain.get(color);
+    }
+    
+    public void removeAllGrains() {
+        for (Grain grain : grains) {
+            List<Cell> cells = grain.getCells();
+            while (!cells.isEmpty()) {
+                cells.get(0).removeFromGrain();
+            }
+        } 
+        
+        grains = new ArrayList<>();
+        color2grain = new HashMap<>();
+    }
+    
+    public void removeGrains(Set<GrainImpl> grainsToRemove) {
+        for (GrainImpl grain : grainsToRemove) {
+            List<Cell> cells = grain.getCells();
+                while(!cells.isEmpty()) {
+                    cells.get(0).removeFromGrain();
+                }
+            grains.remove(grain);
+            color2grain.remove(grain.getColor());
+        }
+    }
+    
+    public void removeExceptSelected(Set<GrainImpl> selectedGrains) {
+        for (Grain grain : grains) {
+            if (selectedGrains.contains(grain)) {
+                continue;
+            }
+            
+            List<Cell> cells = grain.getCells();
+            while (!cells.isEmpty()) {
+                cells.get(0).removeFromGrain();
+            }
+            
+        }
+        
+        grains = new ArrayList<>(selectedGrains);
+        color2grain = grains.stream().collect(Collectors.toMap(GrainImpl::getColor, Function.identity()));
+    }
+    
+    public void removeAllInclusions() {
+        for (Inclusion inclusion : inclusions) {
+            List<Cell> cells = inclusion.getCells();
+            while (!cells.isEmpty()) {
+                cells.get(0).removeFromGrain();
+            }
+        }
+        
+        inclusions = new ArrayList<>();
+        id2Inclusion = new HashMap<>();
+    }
+    
+    public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
+        if (selectedGrains.size() < 2) {
+            return;
+        }
+        
+        GrainImpl mainGrain = (GrainImpl) createNeuclon();
+        
+        for (GrainImpl grain : selectedGrains) {
+            List<Cell> cells = grain.getCells();
+            while(!cells.isEmpty()) {
+                cells.get(0).setGrain(mainGrain);
+            }
+        }
+        
+        removeGrains(selectedGrains);
+    }
+    
+    public void clearAll() {
+        removeAllGrains();
+        removeAllInclusions();
     }
     
     private Color getRandomColor() {
