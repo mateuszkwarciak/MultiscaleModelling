@@ -2,8 +2,6 @@ package com.mk.multiscalemodeling.project1.io.jsonModels;
 
 import java.util.List;
 
-import com.mk.multiscalemodeling.project1.model.Inclusion;
-
 import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;

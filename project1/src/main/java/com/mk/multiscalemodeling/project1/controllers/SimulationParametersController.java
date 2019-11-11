@@ -121,12 +121,16 @@ public class SimulationParametersController implements Initializable{
     @FXML
     void startImmediateAction(ActionEvent event) {
         Neighbourhood selectedNeighborhood = getNeighbourhood();
+        int counter = 0;
         if (selectedNeighborhood == null) {
             log.warn("Cannot run simulation. Select neighbourhood");
             return;
+        } else if (selectedNeighborhood instanceof ShapeControl) {
+            log.debug("Performing 1 iteration grain growth with VonNeuman neighbourhood before growing with Shape Control");
+            simulationManager.simulateGrowth(new VonNeuman());
+            counter++;
         }
-        
-        int counter = 0;
+             
         while(simulationManager.simulateGrowth(selectedNeighborhood)) {
             counter ++;
             log.info("Processing grain growth. Iteration no: {}", counter);
@@ -139,6 +143,7 @@ public class SimulationParametersController implements Initializable{
     private void stepByStepSimulation(Neighbourhood selectedNeighborhood) {
         if(!simulationManager.simulateGrowth(selectedNeighborhood)) {
             if (timeline != null) {
+                log.info("End of simulation. No chenges in iteration");
                 timeline.stop();
             }
         };

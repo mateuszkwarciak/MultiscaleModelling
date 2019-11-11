@@ -3,7 +3,9 @@ package com.mk.multiscalemodeling.project1.model;
 import java.util.UUID;
 
 import javafx.scene.paint.Color;
+import lombok.ToString;
 
+@ToString
 public class Inclusion extends Grain {
    
     public static Color COLOR = Color.BLACK;
