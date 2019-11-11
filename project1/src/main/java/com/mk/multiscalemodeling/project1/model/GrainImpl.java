@@ -1,7 +1,9 @@
 package com.mk.multiscalemodeling.project1.model;
 
 import javafx.scene.paint.Color;
+import lombok.ToString;
 
+@ToString
 public class GrainImpl extends Grain {
 
     private GrainStatus status;

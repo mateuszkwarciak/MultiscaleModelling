@@ -46,12 +46,12 @@ public class VonNeuman implements Neighbourhood {
     }
     
     private void increment(Map<Grain, AtomicInteger> grain2Count, Grain grainToAdd) {
-        AtomicInteger numberOfoOccurrences = grain2Count.get(grainToAdd);
-        if (numberOfoOccurrences == null) {
+        AtomicInteger numberOfOccurrences = grain2Count.get(grainToAdd);
+        if (numberOfOccurrences == null) {
             grain2Count.put(grainToAdd, new AtomicInteger(1));
             return;
         }
-        numberOfoOccurrences.incrementAndGet();
+        numberOfOccurrences.incrementAndGet();
         
     }
 
