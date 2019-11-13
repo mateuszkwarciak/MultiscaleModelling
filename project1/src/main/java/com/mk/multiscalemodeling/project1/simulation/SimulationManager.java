@@ -47,7 +47,10 @@ public class SimulationManager {
         this.dimX = dimX;
         this.dimY = dimY;
         
+        //because there are a lot of problems between javaFx and Spring compatibility 
+        //TODO: try to resolve problems with compatibility
         grainsManager = JavaFxBridge.applicationContext.getBean(GrainsManager.class);
+        grainsManager.init(this);
         
         if (this.simulationStatus.equals(SimulationStatus.NEW)) {
             initCells();
@@ -159,8 +162,18 @@ public class SimulationManager {
         return hasGrown;
     }
     
+    public void addBorder(Set<GrainImpl> grains, int width) {
+        log.info("Adding borders for selected grains");
+        grainsManager.addBorder(grains, width);
+    }
+    
+    public void addBorderForAllGrains(int width) {
+        log.info("Adding borders for all grains");
+        grainsManager.addBorderForAllGrains(width);
+    }
+    
     public boolean isInSimulationRange(int i, int j) {
-        return ((i > 0) && (i < (dimX + 2)) && (j > 0) && (j < (dimY + 2)));
+        return ((i > 0) && (i < (dimX + 1)) && (j > 0) && (j < (dimY + 1)));
     }
     
     public void clearSimulation() {
@@ -196,6 +209,34 @@ public class SimulationManager {
         }
         
         return fullGrown = !emptyCell;
+    }
+    
+    public Cell getFromAbove(Cell cell) {
+        if (isInSimulationRange(cell.getX(), cell.getY() - 1)) {
+            return cells[cell.getX()][cell.getY() - 1];
+        }
+        return null;
+    }
+    
+    public Cell getFromLeft(Cell cell) {
+        if (isInSimulationRange(cell.getX() - 1, cell.getY())) {
+            return cells[cell.getX() - 1][cell.getY()];
+        }
+        return null;
+    }
+    
+    public Cell getFromBelow(Cell cell) {
+        if (isInSimulationRange(cell.getX(), cell.getY() + 1)) {
+            return cells[cell.getX()][cell.getY() + 1];
+        }
+        return null;
+    }
+    
+    public Cell getFromRight(Cell cell) {
+        if (isInSimulationRange(cell.getX() + 1, cell.getY())) {
+            return cells[cell.getX() + 1][cell.getY()];
+        }
+        return null;
     }
     
     private void initCells() {

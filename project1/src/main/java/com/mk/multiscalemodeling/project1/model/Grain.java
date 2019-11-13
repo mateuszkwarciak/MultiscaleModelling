@@ -8,12 +8,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@ToString
 public abstract class Grain {
 
     @Getter
     @Setter
-    public List<Cell> cells = new ArrayList<>();
+    private List<Cell> cells = new ArrayList<>();
     
     public abstract GrainStatus getStatus();
     public void setStatus(GrainStatus status) {};

@@ -48,6 +48,8 @@ public class SimulationParametersController implements Initializable{
     @FXML private JFXSlider shapeRatioSlider;
     @FXML private JFXToggleButton editModeToggle;
     @FXML private VBox selectedGrainsBox;
+    @FXML private JFXTextField borderWidthField;
+    @FXML private Text boundariesPercentText;
     
     private Set<GrainImpl> selectedGrains;
     
@@ -70,6 +72,7 @@ public class SimulationParametersController implements Initializable{
         noNucleonsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         noInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         sizeInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        borderWidthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         
         neighbourhoodTypeComboBox.getItems().addAll(VONNEUMAN_NEIGHBOURHOOD, SHAPE_CONTROL_NEIGHBOURHOOD);
         typeInclusionsComboBox.getItems().addAll(INCLUSION_SQUARE, INCLUSION_CIRCLE);
@@ -79,7 +82,12 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void nucleatingAction(ActionEvent event) {
-        int numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
+        int numberOfNucleons;
+        try {
+            numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            numberOfNucleons = 0;
+        }
         
         if (numberOfNucleons == 0) {
             simulationController.showAlert("Warning", "Number of neuclons should be greater than 0");
@@ -99,8 +107,16 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void addInclusionsAction(ActionEvent event) {
-        int numberOfInclusions = (int) noInclusionsField.getTextFormatter().getValue();
-        int sizeOfInclusions = (int) sizeInclusionsField.getTextFormatter().getValue();
+        int numberOfInclusions;
+        int sizeOfInclusions;
+        try {
+            numberOfInclusions = (int) noInclusionsField.getTextFormatter().getValue();
+            sizeOfInclusions = (int) sizeInclusionsField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            numberOfInclusions = 0;
+            sizeOfInclusions = 0;
+        }
+        
         InclusionType inclusionShape = getInclusionShape();
         
         if (numberOfInclusions == 0 || sizeOfInclusions == 0 || inclusionShape == null) {
@@ -149,9 +165,9 @@ public class SimulationParametersController implements Initializable{
             simulationController.showAlert("Warning", "Select neighbourhood");
             return;
         } else if (selectedNeighborhood instanceof ShapeControl) {
-            log.debug("Performing 1 iteration grain growth with VonNeuman neighbourhood before growing with Shape Control");
-            simulationManager.simulateGrowth(new VonNeuman());
-            counter++;
+            //log.debug("Performing 1 iteration grain growth with VonNeuman neighbourhood before growing with Shape Control");
+            //simulationManager.simulateGrowth(new VonNeuman());
+            //counter++;
         }
              
         while(simulationManager.simulateGrowth(selectedNeighborhood)) {
@@ -188,6 +204,51 @@ public class SimulationParametersController implements Initializable{
     void mergeAction(ActionEvent event) {
         mergeSelectedGrains();
         simulationController.drawCellsOnCanvas();
+    }
+    
+    @FXML
+    void boundariesForAllAction(ActionEvent event) {
+        int borderWidth = getBorderWidth();
+        if (borderWidth == 0) {
+            return;
+        }
+        
+        simulationManager.addBorderForAllGrains(borderWidth);
+        simulationController.drawCellsOnCanvas();
+    }
+
+    @FXML
+    void boundariesForSelectedAction(ActionEvent event) {
+        int borderWidth = getBorderWidth();
+        if (borderWidth == 0) {
+            return;
+        }
+        
+        if (selectedGrains.size() > 0) {
+            simulationManager.addBorder(selectedGrains, borderWidth);
+            simulationController.drawCellsOnCanvas();
+        }  
+    }
+    
+    private int getBorderWidth() {
+        int borderWidth;
+        try {
+            borderWidth = (int) borderWidthField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            borderWidth = 0;
+        }
+        
+        if (borderWidth == 0) {
+            simulationController.showAlert("Warning", "Size of border should be greater than 0");
+            return 0;
+        }
+        if (borderWidth > 10) {
+            simulationController.showAlert("Warning", "Border thickness should be less than 11");
+            borderWidthField.setText("10");
+            return 0;
+        }
+        
+        return borderWidth;
     }
     
     private void stepByStepSimulation(Neighbourhood selectedNeighborhood) {

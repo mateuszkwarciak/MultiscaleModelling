@@ -104,11 +104,15 @@ public class SimulationController implements Initializable {
             y++;
             
             Cell selectedCell = simulationManager.getCells()[x][y];
-            log.info("Selected cell {}", selectedCell.toString());
+            log.info("Selected cell X: {}, Y:{}, Color: {}, Status: {}", selectedCell.getX(), selectedCell.getY(), 
+                    (selectedCell.getGrain() != null) ? selectedCell.getGrain().getColor() : null, selectedCell.getStatus());
+                    
             if (parametersController.getEditModeStatus()) {
                 Grain selectedGrain = selectedCell.getGrain();
                 if (selectedGrain != null && !selectedGrain.getStatus().equals(GrainStatus.INCLUSION)) {
-                    parametersController.addSelectedGrain((GrainImpl) selectedGrain);
+                    if (!selectedGrain.getStatus().equals(GrainStatus.BORDER)) {
+                        parametersController.addSelectedGrain((GrainImpl) selectedGrain);
+                    }         
                 }
             }
             
@@ -262,19 +266,35 @@ public class SimulationController implements Initializable {
             alert.close();
         });
         
-        JFXButton removeSelected = new JFXButton("Remove selected");
+        JFXButton removeSelected = new JFXButton("Remove selected grains");
         removeSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            log.info("Perform Clear selected action");
+            log.info("Perform Clear selected grains action");
             parametersController.removeSelectedGrainsFromSimulation();
             parametersController.clearListOfSelectedGrains();
             drawCellsOnCanvas();
             alert.close();
         });
         
-        JFXButton removeNotSelected = new JFXButton("Remove not selected");
+        JFXButton removeNotSelected = new JFXButton("Remove not selected grains");
         removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-            log.info("Perform Clear not selected action");
+            log.info("Perform Clear not selected grains action");
             parametersController.removeAllGrainsExceptSelected();
+            drawCellsOnCanvas();
+            alert.close();
+        });
+        
+        JFXButton removeSelectedWithoutBorder = new JFXButton("Remove selected grains (without border)");
+        removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Remove selected grains (without border) action");
+           
+            drawCellsOnCanvas();
+            alert.close();
+        });
+        
+        JFXButton removeNotSelectedWithouttBorder = new JFXButton("Remove not selected grains (without border)");
+        removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+            log.info("Perform Remove not selected grains (without border) action");
+           
             drawCellsOnCanvas();
             alert.close();
         });
@@ -285,7 +305,7 @@ public class SimulationController implements Initializable {
             alert.close();
         });
         
-        layout.setActions(clearAll, removeSelected, removeNotSelected, cancel);
+        layout.setActions(clearAll, removeSelected, removeNotSelected, removeSelectedWithoutBorder, removeNotSelectedWithouttBorder, cancel);
         alert.setContent(layout);
         
         alert.show();
@@ -300,7 +320,7 @@ public class SimulationController implements Initializable {
         layout.setHeading(new Label(heading));
         layout.setBody(new HBox(new Label(message)));
         
-        JFXButton okBtn = new JFXButton("OK=k");
+        JFXButton okBtn = new JFXButton("Ok");
         okBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             alert.close();
         });
