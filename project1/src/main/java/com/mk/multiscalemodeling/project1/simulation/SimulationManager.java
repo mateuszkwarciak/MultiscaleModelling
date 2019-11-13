@@ -81,6 +81,15 @@ public class SimulationManager {
         }
     }
     
+    public void addNucleonToSimulation(Cell cell) {
+        if (cell.getStatus().equals(CellStatus.EMPTY)) {
+            Grain grain = grainsManager.createNeuclon();
+            cell.setStatus(CellStatus.OCCUPIED);
+            cell.setGrain(grain);;
+            log.trace("Nucleon added to cell array ({},{})", cell.getX(), cell.getY());
+        }
+    }
+    
     public void addInclusionsToSimulation(int count, int sizeOfInclusion, InclusionType shape) {
         log.info("Adding {} inclusions to simulation", count);
         

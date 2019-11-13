@@ -31,6 +31,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -106,15 +107,27 @@ public class SimulationController implements Initializable {
             Cell selectedCell = simulationManager.getCells()[x][y];
             log.info("Selected cell X: {}, Y:{}, Color: {}, Status: {}", selectedCell.getX(), selectedCell.getY(), 
                     (selectedCell.getGrain() != null) ? selectedCell.getGrain().getColor() : null, selectedCell.getStatus());
-                    
+              
+            
             if (parametersController.getEditModeStatus()) {
-                Grain selectedGrain = selectedCell.getGrain();
-                if (selectedGrain != null && !selectedGrain.getStatus().equals(GrainStatus.INCLUSION)) {
-                    if (!selectedGrain.getStatus().equals(GrainStatus.BORDER)) {
-                        parametersController.addSelectedGrain((GrainImpl) selectedGrain);
-                    }         
+                //Select Grain
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    Grain selectedGrain = selectedCell.getGrain();
+                    if (selectedGrain != null && !selectedGrain.getStatus().equals(GrainStatus.INCLUSION)) {
+                        if (!selectedGrain.getStatus().equals(GrainStatus.BORDER)) {
+                            parametersController.addSelectedGrain((GrainImpl) selectedGrain);
+                        }
+                    }
+                //Add inclusion
+                } else if (e.getButton() == MouseButton.SECONDARY) {
+                    if (selectedCell.getStatus().equals(CellStatus.EMPTY)) {
+                        simulationManager.addNucleonToSimulation(selectedCell);
+                        drawCellsOnCanvas();
+                        log.info("Neuclon added into simulation");
+                    }
                 }
             }
+            
             
         });
         
