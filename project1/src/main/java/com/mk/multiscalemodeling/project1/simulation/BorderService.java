@@ -1,7 +1,6 @@
 package com.mk.multiscalemodeling.project1.simulation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,11 +10,15 @@ import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BorderService {
 
+    @Getter
+    @Setter
     private List<Border> borders;
     
     private SimulationManager simulationManager;

@@ -13,7 +13,6 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Component;
 
-import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.model.Border;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.Grain;
@@ -43,6 +42,7 @@ public class GrainsManager {
     @Getter
     private Map<String, Inclusion> id2Inclusion = new HashMap<>();
     
+    @Getter
     private BorderService borderService;
 
     public void init(SimulationManager simulationManager) {

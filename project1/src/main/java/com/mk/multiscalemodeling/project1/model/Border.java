@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javafx.scene.paint.Color;
 import lombok.Getter;
+import lombok.Setter;
 
 public class Border extends Grain {
 
