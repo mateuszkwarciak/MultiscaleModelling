@@ -149,7 +149,7 @@ public class SimulationManager {
     public boolean simulateGrowth(Neighbourhood neighbourhoodType) {
         boolean hasGrown = false;
         List<Pair<Cell, Grain>> cellsToUpdate = new ArrayList<>();
-        log.debug("Perform 1 iteration of simulation");
+        log.trace("Perform 1 iteration of simulation");
         for (int i = 1; i < dimX + 1; i ++) {
             for (int j = 1; j < dimY + 1; j++) {
                 if (cells[i][j].getStatus().equals(CellStatus.EMPTY)) {
@@ -166,7 +166,7 @@ public class SimulationManager {
         cellsToUpdate.stream().forEach((e) -> {
             updateCells(e.getLeft(), e.getRight());
         });
-        log.debug("Cells updated");
+        log.trace("Cells updated");
         return hasGrown;
     }
     

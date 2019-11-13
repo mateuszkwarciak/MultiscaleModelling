@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
+import com.mk.multiscalemodeling.project1.model.GrainStatus;
 
 public class VonNeuman implements Neighbourhood {
     
@@ -46,6 +47,9 @@ public class VonNeuman implements Neighbourhood {
     }
     
     private void increment(Map<Grain, AtomicInteger> grain2Count, Grain grainToAdd) {
+        if (!grainToAdd.getStatus().equals(GrainStatus.GRAIN)) {
+            return;
+        }
         AtomicInteger numberOfOccurrences = grain2Count.get(grainToAdd);
         if (numberOfOccurrences == null) {
             grain2Count.put(grainToAdd, new AtomicInteger(1));
