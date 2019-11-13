@@ -154,7 +154,8 @@ public class SimulationController implements Initializable {
         for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
             for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
                 // draw if cell not empty
-                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED) || cells[i][j].getStatus().equals(CellStatus.INCLUSION)) {
+                if (cells[i][j].getStatus().equals(CellStatus.OCCUPIED) || cells[i][j].getStatus().equals(CellStatus.INCLUSION)
+                        || cells[i][j].getStatus().equals(CellStatus.BORDER)) {
                     gc.setFill(cells[i][j].getGrain().getColor());
                     // subtract 1 to avoid drawing white frame 
                     gc.fillRect((i - 1) * cellSize, (j - 1) * cellSize, cellSize, cellSize);
@@ -263,39 +264,45 @@ public class SimulationController implements Initializable {
             parametersController.clearListOfSelectedGrains();
             simulationManager.clearSimulation();
             drawCellsOnCanvas();
+            parametersController.refreshGBOccupationRatio();
             alert.close();
         });
         
         JFXButton removeSelected = new JFXButton("Remove selected grains");
         removeSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             log.info("Perform Clear selected grains action");
-            parametersController.removeSelectedGrainsFromSimulation();
+            parametersController.removeSelectedGrainsFromSimulation(false);
             parametersController.clearListOfSelectedGrains();
             drawCellsOnCanvas();
+            parametersController.refreshGBOccupationRatio();
             alert.close();
         });
         
         JFXButton removeNotSelected = new JFXButton("Remove not selected grains");
         removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             log.info("Perform Clear not selected grains action");
-            parametersController.removeAllGrainsExceptSelected();
+            parametersController.removeAllGrainsExceptSelected(false);
             drawCellsOnCanvas();
+            parametersController.refreshGBOccupationRatio();
             alert.close();
         });
         
-        JFXButton removeSelectedWithoutBorder = new JFXButton("Remove selected grains (without border)");
-        removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+        JFXButton removeSelectedWithBorder = new JFXButton("Remove selected grains (with border)");
+        removeSelectedWithBorder.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             log.info("Perform Remove selected grains (without border) action");
-           
+            parametersController.removeSelectedGrainsFromSimulation(true);
+            parametersController.clearListOfSelectedGrains();
             drawCellsOnCanvas();
+            parametersController.refreshGBOccupationRatio();
             alert.close();
         });
         
-        JFXButton removeNotSelectedWithouttBorder = new JFXButton("Remove not selected grains (without border)");
-        removeNotSelected.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+        JFXButton removeNotSelectedWithBorder = new JFXButton("Remove not selected grains (with border)");
+        removeNotSelectedWithBorder.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
             log.info("Perform Remove not selected grains (without border) action");
-           
+            parametersController.removeAllGrainsExceptSelected(true);
             drawCellsOnCanvas();
+            parametersController.refreshGBOccupationRatio();
             alert.close();
         });
         
@@ -305,7 +312,7 @@ public class SimulationController implements Initializable {
             alert.close();
         });
         
-        layout.setActions(clearAll, removeSelected, removeNotSelected, removeSelectedWithoutBorder, removeNotSelectedWithouttBorder, cancel);
+        layout.setActions(clearAll, removeSelected, removeNotSelected, removeSelectedWithBorder, removeNotSelectedWithBorder, cancel);
         alert.setContent(layout);
         
         alert.show();

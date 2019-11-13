@@ -154,11 +154,10 @@ public class SimulationManager {
         
         hasGrown = !cellsToUpdate.isEmpty();
         
-        log.trace("Update cells");
         cellsToUpdate.stream().forEach((e) -> {
             updateCells(e.getLeft(), e.getRight());
         });
-        
+        log.debug("Cells updated");
         return hasGrown;
     }
     
@@ -178,15 +177,16 @@ public class SimulationManager {
     
     public void clearSimulation() {
         grainsManager.clearAll();
+        
         initCells();
     }
     
-    public void removeSelectedGrains(Set<GrainImpl> grainsToRemove) {
-        grainsManager.removeGrains(grainsToRemove);
+    public void removeSelectedGrains(Set<GrainImpl> grainsToRemove, boolean removeBorder) {
+        grainsManager.removeGrains(grainsToRemove, removeBorder);
     }
     
-    public void removeExceptSelectedGrains(Set<GrainImpl> selectedGrains) {
-        grainsManager.removeExceptSelected(selectedGrains);
+    public void removeExceptSelectedGrains(Set<GrainImpl> selectedGrains, boolean removeBorder) {
+        grainsManager.removeExceptSelected(selectedGrains, removeBorder);
     }
     
     public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
@@ -198,6 +198,7 @@ public class SimulationManager {
         cellToUpdate.setStatus(CellStatus.OCCUPIED);      
     }
     
+    /*
     private boolean checkIfFullyGrown() {
         boolean emptyCell = false;
         for (int i = 1; i <+ dimX; i ++) {
@@ -210,6 +211,7 @@ public class SimulationManager {
         
         return fullGrown = !emptyCell;
     }
+    */
     
     public Cell getFromAbove(Cell cell) {
         if (isInSimulationRange(cell.getX(), cell.getY() - 1)) {
@@ -237,6 +239,20 @@ public class SimulationManager {
             return cells[cell.getX() + 1][cell.getY()];
         }
         return null;
+    }
+    
+    public double computeBoundriesOccupation() {
+        double simulationArea = dimX * dimY;
+        int cellWithBorder = 0;
+        for (int i = 0; i < (dimX + 2); i ++) {
+            for (int j = 0; j < (dimY + 2); j++) {
+                if (cells[i][j].getStatus().equals(CellStatus.BORDER)) {
+                    cellWithBorder++;
+                }
+            }
+        }
+        
+        return  (((double) cellWithBorder) / simulationArea) * 100;
     }
     
     private void initCells() {

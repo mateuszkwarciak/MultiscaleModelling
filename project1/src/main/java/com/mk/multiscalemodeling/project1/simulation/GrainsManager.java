@@ -129,8 +129,14 @@ public class GrainsManager {
         color2grain = new HashMap<>();
     }
     
-    public void removeGrains(Set<GrainImpl> grainsToRemove) {
+    public void removeGrains(Set<GrainImpl> grainsToRemove, boolean removeBorder) {
         for (GrainImpl grain : grainsToRemove) {
+            
+            if (removeBorder) {
+                log.info("Usuwamy granice");
+                borderService.removeBorder(((GrainImpl)grain).getBorder());      
+            }
+            
             List<Cell> cells = grain.getCells();
                 while(!cells.isEmpty()) {
                     cells.get(0).removeFromGrain();
@@ -140,10 +146,14 @@ public class GrainsManager {
         }
     }
     
-    public void removeExceptSelected(Set<GrainImpl> selectedGrains) {
+    public void removeExceptSelected(Set<GrainImpl> selectedGrains, boolean removeBorder) {
         for (Grain grain : grains) {
             if (selectedGrains.contains(grain)) {
                 continue;
+            }
+            
+            if (removeBorder) {
+                borderService.removeBorder(((GrainImpl)grain).getBorder());      
             }
             
             List<Cell> cells = grain.getCells();
@@ -169,6 +179,10 @@ public class GrainsManager {
         id2Inclusion = new HashMap<>();
     }
     
+    public void removeAllBorders() {
+        borderService.removeAllBorders();
+    }
+    
     public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
         if (selectedGrains.size() < 2) {
             return;
@@ -183,7 +197,7 @@ public class GrainsManager {
             }
         }
         
-        removeGrains(selectedGrains);
+        removeGrains(selectedGrains, false);
     }
     
     public void clearAll() {

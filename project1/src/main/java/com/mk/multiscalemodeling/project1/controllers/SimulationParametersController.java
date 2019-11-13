@@ -59,6 +59,8 @@ public class SimulationParametersController implements Initializable{
     private static final String INCLUSION_SQUARE = "Square";
     private static final String INCLUSION_CIRCLE = "Circle";
     
+    private static final String BOUNDARIES_PERCENT_LABEL = " % of GB";
+    
     private Timeline timeline;
     
     private SimulationController simulationController;
@@ -135,6 +137,7 @@ public class SimulationParametersController implements Initializable{
     @FXML
     void clearAction(ActionEvent event) {
         simulationController.clearAlert();
+        refreshGBOccupationRatio();
     }
 
     @FXML
@@ -145,6 +148,10 @@ public class SimulationParametersController implements Initializable{
             simulationController.showAlert("Warning", "Select neighbourhood");
             return;
         }
+        
+        //stepByStepSimulation(selectedNeighborhood);
+        //simulationController.drawCellsOnCanvas();
+        //return;
         
         KeyFrame simulation = new KeyFrame(Duration.seconds(0.1), (e) -> {
             stepByStepSimulation(selectedNeighborhood);
@@ -204,6 +211,7 @@ public class SimulationParametersController implements Initializable{
     void mergeAction(ActionEvent event) {
         mergeSelectedGrains();
         simulationController.drawCellsOnCanvas();
+        refreshGBOccupationRatio();
     }
     
     @FXML
@@ -215,6 +223,7 @@ public class SimulationParametersController implements Initializable{
         
         simulationManager.addBorderForAllGrains(borderWidth);
         simulationController.drawCellsOnCanvas();
+        refreshGBOccupationRatio();
     }
 
     @FXML
@@ -227,6 +236,7 @@ public class SimulationParametersController implements Initializable{
         if (selectedGrains.size() > 0) {
             simulationManager.addBorder(selectedGrains, borderWidth);
             simulationController.drawCellsOnCanvas();
+            refreshGBOccupationRatio();
         }  
     }
     
@@ -256,6 +266,7 @@ public class SimulationParametersController implements Initializable{
             if (timeline != null) {
                 log.info("End of simulation. No chenges in iteration");
                 timeline.stop();
+                refreshGBOccupationRatio();
             }
         };
     }
@@ -298,12 +309,14 @@ public class SimulationParametersController implements Initializable{
         refreshListOfSelectedGrains();
     }
     
-    public void removeSelectedGrainsFromSimulation() {
-        simulationManager.removeSelectedGrains(selectedGrains);
+    public void removeSelectedGrainsFromSimulation(boolean removeBorder) {
+        simulationManager.removeSelectedGrains(selectedGrains, removeBorder);
+        refreshGBOccupationRatio();
     }
     
-    public void removeAllGrainsExceptSelected() {
-        simulationManager.removeExceptSelectedGrains(selectedGrains);
+    public void removeAllGrainsExceptSelected(boolean removeBorder) {
+        simulationManager.removeExceptSelectedGrains(selectedGrains, removeBorder);
+        refreshGBOccupationRatio();
     }
     
     public void mergeSelectedGrains() {
@@ -329,6 +342,13 @@ public class SimulationParametersController implements Initializable{
             
             selectedGrainsBox.getChildren().add(grainLabel);
         }
+    }
+    
+    public void refreshGBOccupationRatio() {
+        double ratioGB = simulationManager.computeBoundriesOccupation();
+        String ratioText = String.format("%.2f", ratioGB);
+        
+        boundariesPercentText.setText(ratioText + BOUNDARIES_PERCENT_LABEL);
     }
     
     void setSimulationController(SimulationController simulationController) {

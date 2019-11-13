@@ -1,13 +1,13 @@
 package com.mk.multiscalemodeling.project1.simulation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.stereotype.Component;
-
 import com.mk.multiscalemodeling.project1.model.Border;
 import com.mk.multiscalemodeling.project1.model.Cell;
+import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
 
@@ -51,19 +51,41 @@ public class BorderService {
         log.info("Added border for grain");
     }
     
-    public void removeBorder(Set<GrainImpl> grains) {
-        if (grains != null) {
-            grains.stream().forEach((grain) -> {removeBorder(grain);});
+    public void removeAllBorders() {
+        while(!borders.isEmpty()) {
+            removeBorder(borders.get(0));
         }
+        log.info("");
     }
     
-    public void removeBorder(GrainImpl grain) {
+    public void removeBorder(Set<GrainImpl> grains) {
+        if (grains != null) {
+            grains.stream().forEach((grain) -> {removeBorder(grain.getBorder());});
+        }
+        log.info("Border set removed");
+    }
+    
+    public void removeBorder(Border borderToRemove) {
+        log.debug("Removing border");
+        if (borderToRemove == null) {
+            return;
+        }
         
+        List<Cell> cellsToEarse = borderToRemove.getCells(); 
+        while (!cellsToEarse.isEmpty()) {
+            cellsToEarse.remove(0).removeFromGrain();
+        }
+        
+        borders.remove(borderToRemove);
+        
+        log.info("Border removed");
     }
     
     private void markCellsOnBorder(Border border, List<Cell> cellsToMark) {
         while (!cellsToMark.isEmpty()) {
-            cellsToMark.remove(0).setGrain((Grain) border);
+            Cell cell = cellsToMark.remove(0);
+            cell.setGrain((Grain) border);
+            cell.setStatus(CellStatus.BORDER);
         }
     }
     
