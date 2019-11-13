@@ -16,6 +16,7 @@ public class CellDataModel {
     Color color;
     CellStatus status;
     
-    //Optional value
+    //Optional values
     String inclusionId;
+    String borderId;
 }

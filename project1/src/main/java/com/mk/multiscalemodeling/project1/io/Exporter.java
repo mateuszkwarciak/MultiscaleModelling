@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -12,9 +13,11 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.google.gson.Gson;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
+import com.mk.multiscalemodeling.project1.io.jsonModels.BorderDataModel;
 import com.mk.multiscalemodeling.project1.io.jsonModels.CellDataModel;
 import com.mk.multiscalemodeling.project1.io.jsonModels.GrainDataModel;
 import com.mk.multiscalemodeling.project1.io.jsonModels.JsonSImulationModel;
+import com.mk.multiscalemodeling.project1.model.Border;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
@@ -52,17 +55,25 @@ public class Exporter {
         if (!FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("json")) {
             file = new File(file.toString() + ".json");
         }
-        log.info("1");
+
         JsonSImulationModel dataToSave = new JsonSImulationModel();
         dataToSave.setWidth(simulationManager.getDimX());
         dataToSave.setHight(simulationManager.getDimY());
-        log.info("2");
-        dataToSave.setGrains(grainsManager.getGrains().stream().map((e) -> new GrainDataModel(e.getColor(), e.getStatus()))
+
+        dataToSave.setGrains(grainsManager.getGrains().stream().map((grain) -> new GrainDataModel(grain.getColor(), grain.getStatus()))
                 .collect(Collectors.toList()));
-        log.info("2.5");
+        
+        List<BorderDataModel> bordersModel = new ArrayList<>();
+        grainsManager.getBorderService().getBorders().stream().forEach((border) -> {
+            Color colorOfConnectedGrain = (border.getGrain() != null) ? border.getGrain().getColor() : null;
+            bordersModel.add(new BorderDataModel(border.getBorderId(), colorOfConnectedGrain));
+        });
+        
+        dataToSave.setBorders(bordersModel);
+        
         dataToSave.setInclusionsId(new ArrayList<>(grainsManager.getId2Inclusion().keySet()));
         dataToSave.setCells(new ArrayList<>());
-        log.info("3");
+
         Cell[][] cells = simulationManager.getCells();
         for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
             for (int j = 1; j < simulationManager.getDimY() + 1; j++) {
@@ -72,9 +83,12 @@ public class Exporter {
                 CellDataModel cellDataModel;
                 if (cell.getStatus().equals(CellStatus.INCLUSION)) {
                     cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), 
-                            ((Inclusion) cell.getGrain()).getInclusionId());
+                            ((Inclusion) cell.getGrain()).getInclusionId(), null);
+                } else if (cell.getStatus().equals(CellStatus.BORDER)) {
+                    cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), null, 
+                            ((Border) cell.getGrain()).getBorderId());
                 } else {
-                    cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), null);
+                    cellDataModel = new CellDataModel(cell.getX(), cell.getY(), cellColor, cell.getStatus(), null, null);
                 }
                 
                 dataToSave.getCells().add(cellDataModel);

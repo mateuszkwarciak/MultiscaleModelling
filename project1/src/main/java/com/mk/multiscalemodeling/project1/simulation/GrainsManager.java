@@ -2,6 +2,7 @@ package com.mk.multiscalemodeling.project1.simulation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -12,6 +13,7 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Component;
 
+import com.mk.multiscalemodeling.project1.model.Border;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
@@ -39,7 +41,14 @@ public class GrainsManager {
     @Setter
     @Getter
     private Map<String, Inclusion> id2Inclusion = new HashMap<>();
+    
+    @Getter
+    private BorderService borderService;
 
+    public void init(SimulationManager simulationManager) {
+        borderService = new BorderService(simulationManager);
+    }
+    
     public List<Grain> createNeuclons(int count) {
         if (count < 0) {
             log.warn("Wrong number of neuclons to add ({})", count);
@@ -55,7 +64,7 @@ public class GrainsManager {
 
     public Grain createNeuclon() {
         Color neuclonColor = getRandomColor();
-        while (color2grain.containsKey(neuclonColor) || neuclonColor.equals(Inclusion.COLOR)) {
+        while (color2grain.containsKey(neuclonColor) || neuclonColor.equals(Inclusion.COLOR) || neuclonColor.equals(Border.COLOR)) {
             neuclonColor = getRandomColor();
         }
         
@@ -88,6 +97,14 @@ public class GrainsManager {
         return inclusion;
     }
     
+    public void addBorder(Set<GrainImpl> grains, int width) {
+        borderService.addBorder(grains, width);
+    }
+    
+    public void addBorderForAllGrains(int width) {
+        borderService.addBorder(new HashSet<>(grains), width);
+    }
+    
     public List<GrainImpl> getGrains() {
         return grains;
     }
@@ -112,8 +129,14 @@ public class GrainsManager {
         color2grain = new HashMap<>();
     }
     
-    public void removeGrains(Set<GrainImpl> grainsToRemove) {
+    public void removeGrains(Set<GrainImpl> grainsToRemove, boolean removeBorder) {
         for (GrainImpl grain : grainsToRemove) {
+            
+            if (removeBorder) {
+                log.info("Usuwamy granice");
+                borderService.removeBorder(((GrainImpl)grain).getBorder());      
+            }
+            
             List<Cell> cells = grain.getCells();
                 while(!cells.isEmpty()) {
                     cells.get(0).removeFromGrain();
@@ -123,10 +146,14 @@ public class GrainsManager {
         }
     }
     
-    public void removeExceptSelected(Set<GrainImpl> selectedGrains) {
+    public void removeExceptSelected(Set<GrainImpl> selectedGrains, boolean removeBorder) {
         for (Grain grain : grains) {
             if (selectedGrains.contains(grain)) {
                 continue;
+            }
+            
+            if (removeBorder) {
+                borderService.removeBorder(((GrainImpl)grain).getBorder());      
             }
             
             List<Cell> cells = grain.getCells();
@@ -152,6 +179,10 @@ public class GrainsManager {
         id2Inclusion = new HashMap<>();
     }
     
+    public void removeAllBorders() {
+        borderService.removeAllBorders();
+    }
+    
     public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
         if (selectedGrains.size() < 2) {
             return;
@@ -166,7 +197,7 @@ public class GrainsManager {
             }
         }
         
-        removeGrains(selectedGrains);
+        removeGrains(selectedGrains, false);
     }
     
     public void clearAll() {

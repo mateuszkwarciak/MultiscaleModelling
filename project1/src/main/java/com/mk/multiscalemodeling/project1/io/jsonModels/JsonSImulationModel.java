@@ -2,7 +2,6 @@ package com.mk.multiscalemodeling.project1.io.jsonModels;
 
 import java.util.List;
 
-import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,7 +15,7 @@ public class JsonSImulationModel {
     int hight;
     
     List<GrainDataModel> grains;
-    //List<Color> grainsColors;
+    List<BorderDataModel> borders;
     List<String> inclusionsId;
     List<CellDataModel> cells;
     

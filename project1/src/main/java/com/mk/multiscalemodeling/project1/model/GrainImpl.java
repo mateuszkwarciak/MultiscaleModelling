@@ -1,6 +1,8 @@
 package com.mk.multiscalemodeling.project1.model;
 
 import javafx.scene.paint.Color;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @ToString
@@ -8,6 +10,9 @@ public class GrainImpl extends Grain {
 
     private GrainStatus status;
     private Color color;
+    @Getter
+    @Setter
+    private Border border;
     
     public GrainImpl(GrainStatus status, Color color) {
         this.status = status;

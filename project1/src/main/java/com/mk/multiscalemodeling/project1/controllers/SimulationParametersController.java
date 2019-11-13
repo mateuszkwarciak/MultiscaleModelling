@@ -48,6 +48,8 @@ public class SimulationParametersController implements Initializable{
     @FXML private JFXSlider shapeRatioSlider;
     @FXML private JFXToggleButton editModeToggle;
     @FXML private VBox selectedGrainsBox;
+    @FXML private JFXTextField borderWidthField;
+    @FXML private Text boundariesPercentText;
     
     private Set<GrainImpl> selectedGrains;
     
@@ -56,6 +58,8 @@ public class SimulationParametersController implements Initializable{
     
     private static final String INCLUSION_SQUARE = "Square";
     private static final String INCLUSION_CIRCLE = "Circle";
+    
+    private static final String BOUNDARIES_PERCENT_LABEL = " % of GB";
     
     private Timeline timeline;
     
@@ -70,6 +74,7 @@ public class SimulationParametersController implements Initializable{
         noNucleonsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         noInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         sizeInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        borderWidthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         
         neighbourhoodTypeComboBox.getItems().addAll(VONNEUMAN_NEIGHBOURHOOD, SHAPE_CONTROL_NEIGHBOURHOOD);
         typeInclusionsComboBox.getItems().addAll(INCLUSION_SQUARE, INCLUSION_CIRCLE);
@@ -79,7 +84,12 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void nucleatingAction(ActionEvent event) {
-        int numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
+        int numberOfNucleons;
+        try {
+            numberOfNucleons = (int) noNucleonsField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            numberOfNucleons = 0;
+        }
         
         if (numberOfNucleons == 0) {
             simulationController.showAlert("Warning", "Number of neuclons should be greater than 0");
@@ -99,8 +109,16 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void addInclusionsAction(ActionEvent event) {
-        int numberOfInclusions = (int) noInclusionsField.getTextFormatter().getValue();
-        int sizeOfInclusions = (int) sizeInclusionsField.getTextFormatter().getValue();
+        int numberOfInclusions;
+        int sizeOfInclusions;
+        try {
+            numberOfInclusions = (int) noInclusionsField.getTextFormatter().getValue();
+            sizeOfInclusions = (int) sizeInclusionsField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            numberOfInclusions = 0;
+            sizeOfInclusions = 0;
+        }
+        
         InclusionType inclusionShape = getInclusionShape();
         
         if (numberOfInclusions == 0 || sizeOfInclusions == 0 || inclusionShape == null) {
@@ -119,6 +137,7 @@ public class SimulationParametersController implements Initializable{
     @FXML
     void clearAction(ActionEvent event) {
         simulationController.clearAlert();
+        refreshGBOccupationRatio();
     }
 
     @FXML
@@ -129,6 +148,10 @@ public class SimulationParametersController implements Initializable{
             simulationController.showAlert("Warning", "Select neighbourhood");
             return;
         }
+        
+        //stepByStepSimulation(selectedNeighborhood);
+        //simulationController.drawCellsOnCanvas();
+        //return;
         
         KeyFrame simulation = new KeyFrame(Duration.seconds(0.1), (e) -> {
             stepByStepSimulation(selectedNeighborhood);
@@ -149,9 +172,9 @@ public class SimulationParametersController implements Initializable{
             simulationController.showAlert("Warning", "Select neighbourhood");
             return;
         } else if (selectedNeighborhood instanceof ShapeControl) {
-            log.debug("Performing 1 iteration grain growth with VonNeuman neighbourhood before growing with Shape Control");
-            simulationManager.simulateGrowth(new VonNeuman());
-            counter++;
+            //log.debug("Performing 1 iteration grain growth with VonNeuman neighbourhood before growing with Shape Control");
+            //simulationManager.simulateGrowth(new VonNeuman());
+            //counter++;
         }
              
         while(simulationManager.simulateGrowth(selectedNeighborhood)) {
@@ -188,6 +211,54 @@ public class SimulationParametersController implements Initializable{
     void mergeAction(ActionEvent event) {
         mergeSelectedGrains();
         simulationController.drawCellsOnCanvas();
+        refreshGBOccupationRatio();
+    }
+    
+    @FXML
+    void boundariesForAllAction(ActionEvent event) {
+        int borderWidth = getBorderWidth();
+        if (borderWidth == 0) {
+            return;
+        }
+        
+        simulationManager.addBorderForAllGrains(borderWidth);
+        simulationController.drawCellsOnCanvas();
+        refreshGBOccupationRatio();
+    }
+
+    @FXML
+    void boundariesForSelectedAction(ActionEvent event) {
+        int borderWidth = getBorderWidth();
+        if (borderWidth == 0) {
+            return;
+        }
+        
+        if (selectedGrains.size() > 0) {
+            simulationManager.addBorder(selectedGrains, borderWidth);
+            simulationController.drawCellsOnCanvas();
+            refreshGBOccupationRatio();
+        }  
+    }
+    
+    private int getBorderWidth() {
+        int borderWidth;
+        try {
+            borderWidth = (int) borderWidthField.getTextFormatter().getValue();
+        } catch (Exception e) {
+            borderWidth = 0;
+        }
+        
+        if (borderWidth == 0) {
+            simulationController.showAlert("Warning", "Size of border should be greater than 0");
+            return 0;
+        }
+        if (borderWidth > 10) {
+            simulationController.showAlert("Warning", "Border thickness should be less than 11");
+            borderWidthField.setText("10");
+            return 0;
+        }
+        
+        return borderWidth;
     }
     
     private void stepByStepSimulation(Neighbourhood selectedNeighborhood) {
@@ -195,6 +266,7 @@ public class SimulationParametersController implements Initializable{
             if (timeline != null) {
                 log.info("End of simulation. No chenges in iteration");
                 timeline.stop();
+                refreshGBOccupationRatio();
             }
         };
     }
@@ -237,12 +309,14 @@ public class SimulationParametersController implements Initializable{
         refreshListOfSelectedGrains();
     }
     
-    public void removeSelectedGrainsFromSimulation() {
-        simulationManager.removeSelectedGrains(selectedGrains);
+    public void removeSelectedGrainsFromSimulation(boolean removeBorder) {
+        simulationManager.removeSelectedGrains(selectedGrains, removeBorder);
+        refreshGBOccupationRatio();
     }
     
-    public void removeAllGrainsExceptSelected() {
-        simulationManager.removeExceptSelectedGrains(selectedGrains);
+    public void removeAllGrainsExceptSelected(boolean removeBorder) {
+        simulationManager.removeExceptSelectedGrains(selectedGrains, removeBorder);
+        refreshGBOccupationRatio();
     }
     
     public void mergeSelectedGrains() {
@@ -268,6 +342,13 @@ public class SimulationParametersController implements Initializable{
             
             selectedGrainsBox.getChildren().add(grainLabel);
         }
+    }
+    
+    public void refreshGBOccupationRatio() {
+        double ratioGB = simulationManager.computeBoundriesOccupation();
+        String ratioText = String.format("%.2f", ratioGB);
+        
+        boundariesPercentText.setText(ratioText + BOUNDARIES_PERCENT_LABEL);
     }
     
     void setSimulationController(SimulationController simulationController) {

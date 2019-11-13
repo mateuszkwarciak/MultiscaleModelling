@@ -40,12 +40,12 @@ public class Cell {
         if (this.grain != null) {
             this.grain.registerCell(this);
         }
-        
     }
     
     public void removeFromGrain() {
         if (grain != null) {
             grain.deregisterCell(this);
+            grain = null;
             status = CellStatus.EMPTY;
         }
     }

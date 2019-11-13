@@ -47,7 +47,10 @@ public class SimulationManager {
         this.dimX = dimX;
         this.dimY = dimY;
         
+        //because there are a lot of problems between javaFx and Spring compatibility 
+        //TODO: try to resolve problems with compatibility
         grainsManager = JavaFxBridge.applicationContext.getBean(GrainsManager.class);
+        grainsManager.init(this);
         
         if (this.simulationStatus.equals(SimulationStatus.NEW)) {
             initCells();
@@ -151,29 +154,39 @@ public class SimulationManager {
         
         hasGrown = !cellsToUpdate.isEmpty();
         
-        log.trace("Update cells");
         cellsToUpdate.stream().forEach((e) -> {
             updateCells(e.getLeft(), e.getRight());
         });
-        
+        log.debug("Cells updated");
         return hasGrown;
     }
     
+    public void addBorder(Set<GrainImpl> grains, int width) {
+        log.info("Adding borders for selected grains");
+        grainsManager.addBorder(grains, width);
+    }
+    
+    public void addBorderForAllGrains(int width) {
+        log.info("Adding borders for all grains");
+        grainsManager.addBorderForAllGrains(width);
+    }
+    
     public boolean isInSimulationRange(int i, int j) {
-        return ((i > 0) && (i < (dimX + 2)) && (j > 0) && (j < (dimY + 2)));
+        return ((i > 0) && (i < (dimX + 1)) && (j > 0) && (j < (dimY + 1)));
     }
     
     public void clearSimulation() {
         grainsManager.clearAll();
+        
         initCells();
     }
     
-    public void removeSelectedGrains(Set<GrainImpl> grainsToRemove) {
-        grainsManager.removeGrains(grainsToRemove);
+    public void removeSelectedGrains(Set<GrainImpl> grainsToRemove, boolean removeBorder) {
+        grainsManager.removeGrains(grainsToRemove, removeBorder);
     }
     
-    public void removeExceptSelectedGrains(Set<GrainImpl> selectedGrains) {
-        grainsManager.removeExceptSelected(selectedGrains);
+    public void removeExceptSelectedGrains(Set<GrainImpl> selectedGrains, boolean removeBorder) {
+        grainsManager.removeExceptSelected(selectedGrains, removeBorder);
     }
     
     public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
@@ -185,6 +198,7 @@ public class SimulationManager {
         cellToUpdate.setStatus(CellStatus.OCCUPIED);      
     }
     
+    /*
     private boolean checkIfFullyGrown() {
         boolean emptyCell = false;
         for (int i = 1; i <+ dimX; i ++) {
@@ -196,6 +210,49 @@ public class SimulationManager {
         }
         
         return fullGrown = !emptyCell;
+    }
+    */
+    
+    public Cell getFromAbove(Cell cell) {
+        if (isInSimulationRange(cell.getX(), cell.getY() - 1)) {
+            return cells[cell.getX()][cell.getY() - 1];
+        }
+        return null;
+    }
+    
+    public Cell getFromLeft(Cell cell) {
+        if (isInSimulationRange(cell.getX() - 1, cell.getY())) {
+            return cells[cell.getX() - 1][cell.getY()];
+        }
+        return null;
+    }
+    
+    public Cell getFromBelow(Cell cell) {
+        if (isInSimulationRange(cell.getX(), cell.getY() + 1)) {
+            return cells[cell.getX()][cell.getY() + 1];
+        }
+        return null;
+    }
+    
+    public Cell getFromRight(Cell cell) {
+        if (isInSimulationRange(cell.getX() + 1, cell.getY())) {
+            return cells[cell.getX() + 1][cell.getY()];
+        }
+        return null;
+    }
+    
+    public double computeBoundriesOccupation() {
+        double simulationArea = dimX * dimY;
+        int cellWithBorder = 0;
+        for (int i = 0; i < (dimX + 2); i ++) {
+            for (int j = 0; j < (dimY + 2); j++) {
+                if (cells[i][j].getStatus().equals(CellStatus.BORDER)) {
+                    cellWithBorder++;
+                }
+            }
+        }
+        
+        return  (((double) cellWithBorder) / simulationArea) * 100;
     }
     
     private void initCells() {
