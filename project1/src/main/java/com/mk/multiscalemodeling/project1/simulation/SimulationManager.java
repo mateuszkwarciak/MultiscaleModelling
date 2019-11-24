@@ -90,6 +90,33 @@ public class SimulationManager {
         }
     }
     
+    public void addGrainsToSimulationMC(int noOfGrains) {
+        log.info("Filling the simulation with {} grains", noOfGrains);
+        List<Cell> emptyCells = getListOfEmptyCells();
+        if (emptyCells.size() < noOfGrains) {
+            log.error("Number of empty cells in simulation is smaller than number of grains to add.");
+            return;
+        }
+        
+        List<Grain> grains = grainsManager.createNeuclons(noOfGrains);
+        Random random = new Random();
+        
+        while (!emptyCells.isEmpty()) {
+            for (Grain singleGrain: grains) {
+                int sizeOfEmptyCellList = emptyCells.size();
+                if (sizeOfEmptyCellList == 0) {
+                    break;
+                }
+                int intedEmptyCell = random.nextInt(sizeOfEmptyCellList);
+                Cell cell = emptyCells.remove(intedEmptyCell);
+                cell.setGrain(singleGrain);
+                cell.setStatus(CellStatus.OCCUPIED);
+            }
+        }
+        
+        log.info("Simulation filled");
+    }
+    
     public void addInclusionsToSimulation(int count, int sizeOfInclusion, InclusionType shape) {
         log.info("Adding {} inclusions to simulation", count);
         
@@ -275,5 +302,19 @@ public class SimulationManager {
                 }
             }
         }
+    }
+    
+    private List<Cell> getListOfEmptyCells() {
+        List<Cell> emptyCells = new ArrayList<>(dimX * dimY); 
+        for (int i = 1; i < (dimX + 1); i++) {
+            for (int j = 1; j < (dimY + 1); j++) {
+                Cell cell = cells[i][j];
+                if (cell.getStatus().equals(CellStatus.EMPTY)) {
+                    emptyCells.add(cell);
+                }
+            }
+        }
+        
+        return emptyCells;
     }
 }
