@@ -50,6 +50,8 @@ public class SimulationParametersController implements Initializable{
     @FXML private VBox selectedGrainsBox;
     @FXML private JFXTextField borderWidthField;
     @FXML private Text boundariesPercentText;
+    @FXML private JFXTextField noGrainsMCfield;
+    @FXML private JFXTextField noIterationMCField;
     
     private Set<GrainImpl> selectedGrains;
     
@@ -75,6 +77,8 @@ public class SimulationParametersController implements Initializable{
         noInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         sizeInclusionsField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         borderWidthField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        noGrainsMCfield.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
+        noIterationMCField.setTextFormatter(new TextFormatter<>(new PositiveIntegerStringConverter()));
         
         neighbourhoodTypeComboBox.getItems().addAll(VONNEUMAN_NEIGHBOURHOOD, SHAPE_CONTROL_NEIGHBOURHOOD);
         typeInclusionsComboBox.getItems().addAll(INCLUSION_SQUARE, INCLUSION_CIRCLE);
@@ -104,6 +108,18 @@ public class SimulationParametersController implements Initializable{
         }
         
         simulationManager.addNucleonsToSimulation(numberOfNucleons);
+        simulationController.drawCellsOnCanvas();
+    }
+    
+    @FXML
+    void fillWithGrainsMCAction(ActionEvent event) {
+        int noOfGrains = getNoOfGrainsMC();
+        
+        if (noOfGrains < 1) {
+            return;
+        }
+        
+        simulationManager.addGrainsToSimulationMC(noOfGrains);
         simulationController.drawCellsOnCanvas();
     }
     
@@ -187,6 +203,22 @@ public class SimulationParametersController implements Initializable{
     }
     
     @FXML
+    void simulationMCAction(ActionEvent event) {
+        int noIterations = getNoOfIterationsMC();
+        
+        if (!simulationManager.checkIfFullyGrown()) {
+            simulationController.showAlert("Warning", "You cannot run the Monte Carlo Simulation when there are empty cells.");
+            return;
+        }
+        
+        for (int i = 0; i < noIterations; i++) {
+            simulationManager.simulateMC();
+        }
+        
+        simulationController.drawCellsOnCanvas();
+    }
+    
+    @FXML
     void activateSelectedAction(ActionEvent event) {
         for(GrainImpl grain : selectedGrains) {
             grain.setStatus(GrainStatus.GRAIN);
@@ -240,13 +272,36 @@ public class SimulationParametersController implements Initializable{
         }  
     }
     
-    private int getBorderWidth() {
-        int borderWidth;
-        try {
-            borderWidth = (int) borderWidthField.getTextFormatter().getValue();
-        } catch (Exception e) {
-            borderWidth = 0;
+    private int getNoOfGrainsMC() {
+        int noOfGrains = getIntegerFormField(noGrainsMCfield);
+        
+        if (noOfGrains == 0) {
+            simulationController.showAlert("Warning", "Number of grains in Motne Carlo simulation, should be greater than 0");
         }
+        
+        return noOfGrains;
+    }
+    
+    private int getNoOfIterationsMC() {
+        int noOfIterations = getIntegerFormField(noIterationMCField);
+        
+        if (noOfIterations == 0) {
+            simulationController.showAlert("Warning",
+                    "Number of iterations in  Motne Carlo simulation, should be greater than 0");
+            return 0;
+        }
+        
+        if (noOfIterations > 30) {
+            simulationController.showAlert("Warning",
+                    "Number of iterations in  Motne Carlo simulation, should be smaller than 30");
+            return 0;
+        }
+        
+        return noOfIterations;
+    }
+    
+    private int getBorderWidth() {
+        int borderWidth = getIntegerFormField(borderWidthField);
         
         if (borderWidth == 0) {
             simulationController.showAlert("Warning", "Size of border should be greater than 0");
@@ -259,6 +314,17 @@ public class SimulationParametersController implements Initializable{
         }
         
         return borderWidth;
+    }
+    
+    private int getIntegerFormField(JFXTextField field) {
+        int fieldValue;
+        try {
+            fieldValue = (int) field.getTextFormatter().getValue();
+        } catch (Exception e) {
+            fieldValue = 0;
+        }
+        
+        return fieldValue;
     }
     
     private void stepByStepSimulation(Neighbourhood selectedNeighborhood) {
