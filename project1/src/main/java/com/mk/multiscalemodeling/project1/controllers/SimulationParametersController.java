@@ -204,7 +204,18 @@ public class SimulationParametersController implements Initializable{
     
     @FXML
     void simulationMCAction(ActionEvent event) {
-        //TODO:
+        int noIterations = getNoOfIterationsMC();
+        
+        if (!simulationManager.checkIfFullyGrown()) {
+            simulationController.showAlert("Warning", "You cannot run the Monte Carlo Simulation when there are empty cells.");
+            return;
+        }
+        
+        for (int i = 0; i < noIterations; i++) {
+            simulationManager.simulateMC();
+        }
+        
+        simulationController.drawCellsOnCanvas();
     }
     
     @FXML

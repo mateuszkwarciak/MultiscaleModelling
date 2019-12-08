@@ -16,6 +16,7 @@ import com.mk.multiscalemodeling.project1.model.GrainImpl;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
 import com.mk.multiscalemodeling.project1.model.InclusionShape.InclusionType;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
+import com.mk.multiscalemodeling.project1.simulation.mc.MonteCarloController;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -29,18 +30,21 @@ public class SimulationManager {
 
     private SimulationStatus simulationStatus;
     private GrainsManager grainsManager;
+    private MonteCarloController mcController;
     
     @Getter 
     private int dimX;
     @Getter 
     private int dimY;
     
-    @Getter
-    private boolean fullGrown;
+    //@Getter
+    //private boolean fullGrown;
     
     @Getter
     @Setter
     private Cell cells[][];
+    
+    private List<Cell> listOfNonAbsorbingCells = new ArrayList<>();
     
     public void init(SimulationStatus simulationStatus, int dimX, int dimY) {
         this.simulationStatus = simulationStatus;
@@ -51,6 +55,8 @@ public class SimulationManager {
         //TODO: try to resolve problems with compatibility
         grainsManager = JavaFxBridge.applicationContext.getBean(GrainsManager.class);
         grainsManager.init(this);
+        
+        mcController = new MonteCarloController(this);
         
         if (this.simulationStatus.equals(SimulationStatus.NEW)) {
             initCells();
@@ -197,6 +203,16 @@ public class SimulationManager {
         return hasGrown;
     }
     
+    public void simulateMC() {
+        final double energyJ = 0.0;
+        getListOfRandomCells().stream().forEach(cell -> {
+            Grain resolvedGrain = mcController.resolveCellMembership(cell, energyJ);
+            if (!cell.getGrain().equals(resolvedGrain)) {
+                cell.setGrain(resolvedGrain);
+            }
+        });
+    }
+    
     public void addBorder(Set<GrainImpl> grains, int width) {
         log.info("Adding borders for selected grains");
         grainsManager.addBorder(grains, width);
@@ -228,30 +244,30 @@ public class SimulationManager {
     public void mergeSelectedGrains(Set<GrainImpl> selectedGrains) {
         grainsManager.mergeSelectedGrains(selectedGrains);
     }
-    
-    private void updateCells(Cell cellToUpdate, Grain grain) {
-        cellToUpdate.setGrain(grain);
-        cellToUpdate.setStatus(CellStatus.OCCUPIED);      
-    }
-    
-    /*
-    private boolean checkIfFullyGrown() {
-        boolean emptyCell = false;
-        for (int i = 1; i <+ dimX; i ++) {
-            for (int j = 1; j <+ dimY; j++) {
+
+    public boolean checkIfFullyGrown() {
+        for (int i = 1; i < dimX + 1; i ++) {
+            for (int j = 1; j < dimY + 1; j++) {
                 if (cells[i][j].getStatus().equals(CellStatus.EMPTY)) {
-                    emptyCell = true;
+                    log.info("Empty cell on X: {}, Y: {}", i, j);
+                    return false;
                 }
             }
         }
         
-        return fullGrown = !emptyCell;
+        return true;
     }
-    */
     
     public Cell getFromAbove(Cell cell) {
         if (isInSimulationRange(cell.getX(), cell.getY() - 1)) {
             return cells[cell.getX()][cell.getY() - 1];
+        }
+        return null;
+    }
+    
+    public Cell getFromAboveLeft(Cell cell) {
+        if (isInSimulationRange(cell.getX() - 1, cell.getY() - 1)) {
+            return cells[cell.getX() - 1][cell.getY() - 1];
         }
         return null;
     }
@@ -263,6 +279,13 @@ public class SimulationManager {
         return null;
     }
     
+    public Cell getFromBelowLeft(Cell cell) {
+        if (isInSimulationRange(cell.getX() - 1, cell.getY() + 1)) {
+            return cells[cell.getX() - 1][cell.getY() + 1];
+        }
+        return null;
+    }
+    
     public Cell getFromBelow(Cell cell) {
         if (isInSimulationRange(cell.getX(), cell.getY() + 1)) {
             return cells[cell.getX()][cell.getY() + 1];
@@ -270,9 +293,23 @@ public class SimulationManager {
         return null;
     }
     
+    public Cell getFromBelowRight(Cell cell) {
+        if (isInSimulationRange(cell.getX() + 1, cell.getY() + 1)) {
+            return cells[cell.getX() + 1][cell.getY() + 1];
+        }
+        return null;
+    }
+    
     public Cell getFromRight(Cell cell) {
         if (isInSimulationRange(cell.getX() + 1, cell.getY())) {
             return cells[cell.getX() + 1][cell.getY()];
+        }
+        return null;
+    }
+    
+    public Cell getFromAboveRight(Cell cell) {
+        if (isInSimulationRange(cell.getX() + 1, cell.getY() - 1)) {
+            return cells[cell.getX() + 1][cell.getY() - 1];
         }
         return null;
     }
@@ -291,6 +328,11 @@ public class SimulationManager {
         return  (((double) cellWithBorder) / simulationArea) * 100;
     }
     
+    private void updateCells(Cell cellToUpdate, Grain grain) {
+        cellToUpdate.setGrain(grain);
+        cellToUpdate.setStatus(CellStatus.OCCUPIED);      
+    }
+    
     private void initCells() {
         cells = new Cell[dimX + 2][dimY + 2];
         for (int i = 0; i < (dimX + 2); i ++) {
@@ -299,6 +341,7 @@ public class SimulationManager {
                     cells[i][j] = new Cell(CellStatus.ABSORBING, i, j);
                 } else {
                     cells[i][j] = new Cell(CellStatus.EMPTY, i, j);
+                    listOfNonAbsorbingCells.add(cells[i][j]);
                 }
             }
         }
@@ -316,5 +359,18 @@ public class SimulationManager {
         }
         
         return emptyCells;
+    }
+
+    private List<Cell> getListOfRandomCells() {
+        List<Cell> orderedCells = new ArrayList<>(listOfNonAbsorbingCells);
+        List<Cell> randomCells = new ArrayList<>();
+        
+        Random rand = new Random();
+        while (!orderedCells.isEmpty()) {     
+            Cell randomCell = orderedCells.remove(rand.nextInt(orderedCells.size()));
+            randomCells.add(randomCell);
+        }
+        
+        return randomCells;
     }
 }

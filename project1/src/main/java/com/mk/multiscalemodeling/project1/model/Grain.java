@@ -6,7 +6,6 @@ import java.util.List;
 import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 public abstract class Grain {
 
