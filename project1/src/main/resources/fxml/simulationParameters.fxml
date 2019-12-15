@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1133.0" prefWidth="316.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1665.0" prefWidth="316.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label layoutX="17.0" layoutY="14.0" prefHeight="26.0" prefWidth="242.0" stylesheets="@../css/style.css" text="Simulations parameters" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="14.0">
          <font>
@@ -27,7 +27,7 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <JFXButton buttonType="RAISED" layoutX="15.0" layoutY="324.0" onAction="#clearAction" prefHeight="25.0" prefWidth="282.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Clear" textAlignment="CENTER">
+      <JFXButton buttonType="RAISED" layoutX="15.0" layoutY="392.0" onAction="#clearAction" prefHeight="25.0" prefWidth="282.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Clear" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
@@ -44,63 +44,63 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <Separator layoutX="15.0" layoutY="362.0" prefHeight="2.0" prefWidth="282.0" />
-      <Label alignment="CENTER" layoutX="17.0" layoutY="372.0" prefHeight="17.0" prefWidth="282.0" text="Inclusions" textAlignment="CENTER" />
-      <JFXTextField fx:id="noInclusionsField" focusColor="#fdd835" layoutX="23.0" layoutY="395.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of inclusions" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
-      <JFXTextField fx:id="sizeInclusionsField" focusColor="#fdd835" layoutX="168.0" layoutY="395.0" prefHeight="25.0" prefWidth="127.0" promptText="Size of inclusions" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
-      <JFXComboBox fx:id="typeInclusionsComboBox" focusColor="#ffff6b" layoutX="23.0" layoutY="441.0" prefHeight="25.0" prefWidth="127.0" promptText="Type of inclusions" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
-      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="441.0" onAction="#addInclusionsAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Add inclusions" textAlignment="CENTER">
+      <Separator layoutX="17.0" layoutY="431.0" prefHeight="2.0" prefWidth="282.0" />
+      <Label alignment="CENTER" layoutX="17.0" layoutY="440.0" prefHeight="17.0" prefWidth="282.0" text="Inclusions" textAlignment="CENTER" />
+      <JFXTextField fx:id="noInclusionsField" focusColor="#fdd835" layoutX="20.0" layoutY="471.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of inclusions" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
+      <JFXTextField fx:id="sizeInclusionsField" focusColor="#fdd835" layoutX="165.0" layoutY="471.0" prefHeight="25.0" prefWidth="127.0" promptText="Size of inclusions" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
+      <JFXComboBox fx:id="typeInclusionsComboBox" focusColor="#ffff6b" layoutX="20.0" layoutY="517.0" prefHeight="25.0" prefWidth="127.0" promptText="Type of inclusions" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
+      <JFXButton buttonType="RAISED" layoutX="165.0" layoutY="517.0" onAction="#addInclusionsAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Add inclusions" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <Separator layoutX="17.0" layoutY="479.0" prefHeight="2.0" prefWidth="282.0" />
-      <Label alignment="CENTER" layoutX="17.0" layoutY="490.0" prefHeight="17.0" prefWidth="282.0" text="Neighbourhood options" textAlignment="CENTER" />
-      <JFXComboBox fx:id="neighbourhoodTypeComboBox" focusColor="#ffff6b" layoutX="17.0" layoutY="521.0" prefHeight="25.0" prefWidth="282.0" promptText="Type of neighbourhood" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
-      <JFXSlider fx:id="shapeRatioSlider" layoutX="17.0" layoutY="585.0" prefWidth="282.0" stylesheets="@../css/style.css" />
-      <Label alignment="TOP_LEFT" layoutX="17.0" layoutY="565.0" prefHeight="17.0" prefWidth="282.0" text="Shape control ratio" textAlignment="CENTER" />
-      <Separator layoutX="17.0" layoutY="608.0" prefHeight="2.0" prefWidth="282.0" />
-      <Label alignment="CENTER" layoutX="17.0" layoutY="884.0" prefHeight="17.0" prefWidth="282.0" text="Selected grains" textAlignment="CENTER" />
-      <JFXToggleButton fx:id="editModeToggle" layoutX="92.0" layoutY="746.0" prefHeight="42.0" prefWidth="151.0" size="7.0" text="Edit mode" toggleColor="#fdd835" toggleLineColor="#ffff6b" />
-      <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="797.0" onAction="#mergeAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Merge selected" textAlignment="CENTER">
+      <Separator layoutX="15.0" layoutY="568.0" prefHeight="2.0" prefWidth="282.0" />
+      <Label alignment="CENTER" layoutX="15.0" layoutY="577.0" prefHeight="17.0" prefWidth="282.0" text="Neighbourhood options" textAlignment="CENTER" />
+      <JFXComboBox fx:id="neighbourhoodTypeComboBox" focusColor="#ffff6b" layoutX="15.0" layoutY="608.0" prefHeight="25.0" prefWidth="282.0" promptText="Type of neighbourhood" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
+      <JFXSlider fx:id="shapeRatioSlider" layoutX="17.0" layoutY="662.0" prefWidth="282.0" showTickLabels="true" showTickMarks="true" stylesheets="@../css/style.css" />
+      <Label alignment="TOP_LEFT" layoutX="17.0" layoutY="645.0" prefHeight="17.0" prefWidth="282.0" text="Shape control ratio" textAlignment="CENTER" />
+      <Separator layoutX="17.0" layoutY="709.0" prefHeight="2.0" prefWidth="282.0" />
+      <Label alignment="CENTER" layoutX="17.0" layoutY="951.0" prefHeight="17.0" prefWidth="282.0" text="Selected grains" textAlignment="CENTER" />
+      <JFXToggleButton fx:id="editModeToggle" layoutX="92.0" layoutY="825.0" prefHeight="42.0" prefWidth="151.0" size="7.0" text="Edit mode" toggleColor="#fdd835" toggleLineColor="#ffff6b" />
+      <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="876.0" onAction="#mergeAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Merge selected" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="797.0" onAction="#removeSelectionAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Remove selection" textAlignment="CENTER">
+      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="876.0" onAction="#removeSelectionAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Remove selection" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="840.0" onAction="#deactivateSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Deactivate selected" textAlignment="CENTER">
+      <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="919.0" onAction="#deactivateSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Deactivate selected" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <ScrollPane layoutX="17.0" layoutY="909.0" prefHeight="200.0" prefWidth="282.0" stylesheets="@../css/style.css">
+      <ScrollPane layoutX="15.0" layoutY="977.0" prefHeight="200.0" prefWidth="282.0" stylesheets="@../css/style.css">
          <content>
             <VBox fx:id="selectedGrainsBox" prefHeight="200.0" prefWidth="265.0" />
          </content>
       </ScrollPane>
-      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="840.0" onAction="#activateSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Activate selected" textAlignment="CENTER">
+      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="919.0" onAction="#activateSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Activate selected" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <Label alignment="CENTER" layoutX="17.0" layoutY="618.0" prefHeight="17.0" prefWidth="282.0" text="Grain boundaries" textAlignment="CENTER" />
-      <JFXTextField fx:id="borderWidthField" focusColor="#fdd835" layoutX="14.0" layoutY="647.0" prefHeight="25.0" prefWidth="127.0" promptText="Border thickness" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
-      <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="691.0" onAction="#boundariesForAllAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Boundaries for all" textAlignment="CENTER">
+      <Label alignment="CENTER" layoutX="13.0" layoutY="719.0" prefHeight="17.0" prefWidth="282.0" text="Grain boundaries" textAlignment="CENTER" />
+      <JFXTextField fx:id="borderWidthField" focusColor="#fdd835" layoutX="19.0" layoutY="736.0" prefHeight="25.0" prefWidth="127.0" promptText="Border thickness" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
+      <JFXButton buttonType="RAISED" layoutX="19.0" layoutY="780.0" onAction="#boundariesForAllAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Boundaries for all" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <JFXButton buttonType="RAISED" layoutX="168.0" layoutY="691.0" onAction="#boundariesForSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Bound. for selected" textAlignment="CENTER">
+      <JFXButton buttonType="RAISED" layoutX="173.0" layoutY="780.0" onAction="#boundariesForSelectedAction" prefHeight="25.0" prefWidth="127.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Bound. for selected" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
-      <Separator layoutX="17.0" layoutY="736.0" prefHeight="2.0" prefWidth="282.0" />
-      <Text fx:id="boundariesPercentText" layoutX="179.0" layoutY="673.0" strokeType="OUTSIDE" strokeWidth="0.0" text=" 0 % of GB" textAlignment="CENTER" wrappingWidth="127.20000000000005" />
+      <Separator layoutX="17.0" layoutY="815.0" prefHeight="2.0" prefWidth="282.0" />
+      <Text fx:id="boundariesPercentText" layoutX="173.0" layoutY="766.0" strokeType="OUTSIDE" strokeWidth="0.0" text=" 0 % of GB" textAlignment="CENTER" wrappingWidth="127.20000000000005" />
       <Label alignment="CENTER" layoutX="17.0" layoutY="56.0" prefHeight="17.0" prefWidth="282.0" text="Cellular Automaton" textAlignment="CENTER" />
       <Label alignment="CENTER" layoutX="17.0" layoutY="133.0" prefHeight="17.0" prefWidth="282.0" text="Monte Carlo" textAlignment="CENTER" />
       <JFXTextField fx:id="noGrainsMCfield" focusColor="#fdd835" layoutX="14.0" layoutY="167.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of grains" styleClass="jfx-text-field" stylesheets="@../css/style.css" />
@@ -116,5 +116,32 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </JFXButton>
+      <Separator layoutX="17.0" layoutY="1187.0" prefHeight="2.0" prefWidth="282.0" />
+      <Label alignment="CENTER" layoutX="17.0" layoutY="1407.0" prefHeight="17.0" prefWidth="282.0" text="Monte Carlo: Static recrystallisation" textAlignment="CENTER" />
+      <JFXComboBox fx:id="recrystalliesedNucleonLocationComboBox" focusColor="#ffff6b" layoutX="17.0" layoutY="1430.0" prefHeight="25.0" prefWidth="282.0" promptText="Location of nucleons" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
+      <JFXComboBox fx:id="recrystalliesationTypeComboBox" focusColor="#ffff6b" layoutX="15.0" layoutY="1468.0" prefHeight="25.0" prefWidth="282.0" promptText="Nucleation type:" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
+      <JFXTextField fx:id="noRecrystalliezedNucleonsField" focusColor="#fdd835" layoutX="14.0" layoutY="1507.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of nucleons" styleClass="jfx-text-field" stylesheets="@../css/style.css" text="Number of nucleons" />
+      <JFXTextField fx:id="noRecrystallisationIterationsField" focusColor="#fdd835" layoutX="168.0" layoutY="1507.0" prefHeight="25.0" prefWidth="127.0" promptText="Number of iterations" styleClass="jfx-text-field" stylesheets="@../css/style.css" text="Number of iterations" />
+      <Label alignment="CENTER" layoutX="17.0" layoutY="1196.0" prefHeight="17.0" prefWidth="282.0" text="Energy distribution" textAlignment="CENTER" />
+      <JFXComboBox fx:id="energyDistributionTypeComboBox" focusColor="#ffff6b" layoutX="17.0" layoutY="1220.0" prefHeight="25.0" prefWidth="282.0" promptText="Energy distribution type" styleClass="jfx-combobox" stylesheets="@../css/style.css" unFocusColor="#fdd835" />
+      <JFXTextField fx:id="energyInsideField" focusColor="#fdd835" layoutX="14.0" layoutY="1258.0" prefHeight="25.0" prefWidth="127.0" promptText="Energy inside" styleClass="jfx-text-field" stylesheets="@../css/style.css" text="Energy inside" />
+      <JFXTextField fx:id="energyOnEdgeField" focusColor="#fdd835" layoutX="168.0" layoutY="1258.0" prefHeight="25.0" prefWidth="127.0" promptText="Energy on edge" styleClass="jfx-text-field" stylesheets="@../css/style.css" text="Energy on edge" />
+      <JFXButton buttonType="RAISED" layoutX="15.0" layoutY="1364.0" onAction="#distributeEnergyAction" prefHeight="25.0" prefWidth="282.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Distribute energy" textAlignment="CENTER">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </JFXButton>
+      <Separator layoutX="17.0" layoutY="1397.0" prefHeight="2.0" prefWidth="282.0" />
+      <JFXButton buttonType="RAISED" layoutX="13.0" layoutY="1609.0" onAction="#simullateRecrystallisationAction" prefHeight="25.0" prefWidth="282.0" ripplerFill="#fdd835" styleClass="jfx-button-raised" stylesheets="@../css/style.css" text="Simulate recrystallisation" textAlignment="CENTER">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </JFXButton>
+      <JFXSlider fx:id="energyThresholdSlider" layoutX="17.0" layoutY="1318.0" majorTickUnit="0.25" max="1.0" minorTickCount="1" prefWidth="282.0" showTickLabels="true" showTickMarks="true" stylesheets="@../css/style.css" />
+      <Label alignment="TOP_LEFT" layoutX="17.0" layoutY="1301.0" prefHeight="17.0" prefWidth="282.0" text="Dispersion ratio" textAlignment="CENTER" />
+      <JFXSlider fx:id="grainBoundaryRatioClassicSlider" layoutX="15.0" layoutY="343.0" majorTickUnit="0.1" max="1.0" min="0.1" prefWidth="282.0" showTickLabels="true" showTickMarks="true" stylesheets="@../css/style.css" />
+      <Label alignment="TOP_LEFT" layoutX="17.0" layoutY="326.0" prefHeight="17.0" prefWidth="282.0" text="Graim boundary energy ratio" textAlignment="CENTER" />
+      <Label alignment="TOP_LEFT" layoutX="15.0" layoutY="1545.0" prefHeight="17.0" prefWidth="282.0" text="Graim boundary energy ratio" textAlignment="CENTER" />
+      <JFXSlider fx:id="energyThregrainBoundaryRatioRecristallisationSlider" layoutX="13.0" layoutY="1562.0" majorTickUnit="0.1" max="1.0" min="0.1" minorTickCount="1" prefWidth="282.0" showTickLabels="true" showTickMarks="true" stylesheets="@../css/style.css" />
    </children>
 </AnchorPane>

@@ -13,10 +13,16 @@ import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.CellStatus;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
+import com.mk.multiscalemodeling.project1.model.GrainStatus;
 import com.mk.multiscalemodeling.project1.model.Inclusion;
 import com.mk.multiscalemodeling.project1.model.InclusionShape.InclusionType;
 import com.mk.multiscalemodeling.project1.model.neighbourdhood.Neighbourhood;
+import com.mk.multiscalemodeling.project1.simulation.mc.MCRecrystallisationController;
 import com.mk.multiscalemodeling.project1.simulation.mc.MonteCarloController;
+import com.mk.multiscalemodeling.project1.simulation.mc.RecrystallisedLocationType;
+import com.mk.multiscalemodeling.project1.simulation.mc.RecrystallisedNucleatingType;
+import com.mk.multiscalemodeling.project1.simulation.mc.energy.EnergyDistributor;
+import com.mk.multiscalemodeling.project1.simulation.mc.energy.EnergyType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +37,8 @@ public class SimulationManager {
     private SimulationStatus simulationStatus;
     private GrainsManager grainsManager;
     private MonteCarloController mcController;
+    private MCRecrystallisationController mcRecrystallisationController;
+    private EnergyDistributor energyDistributor;
     
     @Getter 
     private int dimX;
@@ -57,6 +65,8 @@ public class SimulationManager {
         grainsManager.init(this);
         
         mcController = new MonteCarloController(this);
+        mcRecrystallisationController = new MCRecrystallisationController(this, grainsManager);
+        energyDistributor = new EnergyDistributor(this);
         
         if (this.simulationStatus.equals(SimulationStatus.NEW)) {
             initCells();
@@ -67,7 +77,7 @@ public class SimulationManager {
     }
     
     public void addNucleonsToSimulation(int count) {
-        List<Grain> nucleonsToAdd = grainsManager.createNeuclons(count);
+        List<Grain> nucleonsToAdd = grainsManager.createNeuclons(count, false);
         
         log.debug("Adding {} neuclons to simulation", count);
         
@@ -104,7 +114,7 @@ public class SimulationManager {
             return;
         }
         
-        List<Grain> grains = grainsManager.createNeuclons(noOfGrains);
+        List<Grain> grains = grainsManager.createNeuclons(noOfGrains, false);
         Random random = new Random();
         
         while (!emptyCells.isEmpty()) {
@@ -149,8 +159,8 @@ public class SimulationManager {
         }
 
     }
-    
-    private boolean checkIfOnGrainsEdge(Cell cellToCheck) {
+
+    public boolean checkIfOnGrainsEdge(Cell cellToCheck) {
         int x = cellToCheck.getX();
         int y = cellToCheck.getY();
         
@@ -203,14 +213,48 @@ public class SimulationManager {
         return hasGrown;
     }
     
-    public void simulateMC() {
-        final double energyJ = 0.0;
+    public void simulateMC(Double grainBoundaryEnergy) {
         getListOfRandomCells().stream().forEach(cell -> {
-            Grain resolvedGrain = mcController.resolveCellMembership(cell, energyJ);
+            Grain resolvedGrain = mcController.resolveCellMembership(cell, grainBoundaryEnergy);
             if (!cell.getGrain().equals(resolvedGrain)) {
                 cell.setGrain(resolvedGrain);
             }
         });
+    }
+    
+    public void addRecrystallisedNucleons(int count, RecrystallisedLocationType locationType) {
+        List<Grain> nucleonsToAdd = grainsManager.createNeuclons(count, true);
+        
+        log.debug("Adding {} recristallised neuclons to simulation", count);
+        
+        Random rand = new Random();
+        while (!nucleonsToAdd.isEmpty()) {
+            // add 1 to move away from the absorbing edge
+            int randomX = 1 + rand.nextInt(dimX);
+            int randomY = 1 + rand.nextInt(dimY);
+            
+            Cell selectedCell = cells[randomX][randomY];
+            
+            if (locationType.equals(RecrystallisedLocationType.BORDER) && (!checkIfOnGrainsEdge(selectedCell))) {
+                continue;
+            }
+            
+            if (selectedCell.getGrain() != null && selectedCell.getGrain().getStatus().equals(GrainStatus.GRAIN)) {
+                selectedCell.setEnergy(0.0);
+                selectedCell.setGrain(nucleonsToAdd.remove(0));
+                log.trace("Recrystallised nucleon added to cell array ({},{})", randomX, randomY);
+            }
+        }
+    }
+    
+    public void distributeEnergy(EnergyType energyType, double threshold, double energyInside, double energyGB) {
+        energyDistributor.distributeEnergy(listOfNonAbsorbingCells, energyType, threshold, energyInside, energyGB);
+    }
+    
+    public void simulateRecristalization(RecrystallisedLocationType locationType, RecrystallisedNucleatingType nucleatingType, int noOfNucleons, 
+            int noOfIterations, double grainBoundaryEnergy) {
+        
+        mcRecrystallisationController.simulateRecristalization(locationType, nucleatingType, noOfNucleons, noOfIterations, grainBoundaryEnergy);
     }
     
     public void addBorder(Set<GrainImpl> grains, int width) {
@@ -361,7 +405,7 @@ public class SimulationManager {
         return emptyCells;
     }
 
-    private List<Cell> getListOfRandomCells() {
+    public List<Cell> getListOfRandomCells() {
         List<Cell> orderedCells = new ArrayList<>(listOfNonAbsorbingCells);
         List<Cell> randomCells = new ArrayList<>();
         
@@ -372,5 +416,9 @@ public class SimulationManager {
         }
         
         return randomCells;
+    }
+    
+    public Pair<Double, Double> getMinMaxEnergy() {
+        return energyDistributor.getMinMaxEnergy(listOfNonAbsorbingCells);
     }
 }

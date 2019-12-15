@@ -13,7 +13,6 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Component;
 
-import com.mk.multiscalemodeling.project1.model.Border;
 import com.mk.multiscalemodeling.project1.model.Cell;
 import com.mk.multiscalemodeling.project1.model.Grain;
 import com.mk.multiscalemodeling.project1.model.GrainImpl;
@@ -33,6 +32,10 @@ public class GrainsManager {
     @Setter
     @Getter
     private Map<Color, GrainImpl> color2grain = new HashMap<>();
+    
+    @Getter
+    private Map<Color, GrainImpl> color2recrystallisedGrain = new HashMap<>();
+    
     @Setter
     private List<GrainImpl> grains = new ArrayList<>();
     //TODO: merge inclusions and id2Inclusion into one collection
@@ -43,29 +46,38 @@ public class GrainsManager {
     private Map<String, Inclusion> id2Inclusion = new HashMap<>();
     
     @Getter
-    private BorderService borderService;
+    private List<GrainImpl> recrystallisedGrains = new ArrayList<>();
+    
+    @Getter
+    BorderService borderService;
 
     public void init(SimulationManager simulationManager) {
         borderService = new BorderService(simulationManager);
     }
     
-    public List<Grain> createNeuclons(int count) {
+    public List<Grain> createNeuclons(int count, boolean rescrystallised) {
         if (count < 0) {
             log.warn("Wrong number of neuclons to add ({})", count);
         }
         
         List<Grain> neuclons = new ArrayList<>();
-        IntStream.rangeClosed(0, count - 1).forEach(e -> {
-            neuclons.add(createNeuclon());
-        });
-        
+        if (rescrystallised) {
+            IntStream.rangeClosed(0, count - 1).forEach(e -> {
+                neuclons.add(createRecrystallisedNeuclon());
+            });
+        } else {
+            IntStream.rangeClosed(0, count - 1).forEach(e -> {
+                neuclons.add(createNeuclon());
+            });
+        }
+ 
         return neuclons;
     }
 
     public Grain createNeuclon() {
-        Color neuclonColor = getRandomColor();
-        while (color2grain.containsKey(neuclonColor) || neuclonColor.equals(Inclusion.COLOR) || neuclonColor.equals(Border.COLOR)) {
-            neuclonColor = getRandomColor();
+        Color neuclonColor = getRandomColorForGrain();
+        while (color2grain.containsKey(neuclonColor)) {
+            neuclonColor = getRandomColorForGrain();
         }
         
         GrainImpl neuclon = new GrainImpl(GrainStatus.GRAIN, neuclonColor);
@@ -74,6 +86,21 @@ public class GrainsManager {
         grains.add(neuclon);
         
         return neuclon;
+    }
+    
+    public Grain createRecrystallisedNeuclon() {
+        Color recrystallisedNeuclonColor = getRandomColorForRecrystallisedGrain();
+        while (color2recrystallisedGrain.containsKey(recrystallisedNeuclonColor)) {
+            recrystallisedNeuclonColor = getRandomColorForGrain();
+        }
+        
+        GrainImpl recrystallisedNeuclon = new GrainImpl(GrainStatus.RECRYSTALLISED, recrystallisedNeuclonColor);
+        
+        color2recrystallisedGrain.put(recrystallisedNeuclonColor, recrystallisedNeuclon);
+        recrystallisedGrains.add(recrystallisedNeuclon);
+        grains.add(recrystallisedNeuclon);
+        
+        return recrystallisedNeuclon;
     }
     
     public List<Inclusion> createInclusion(int count) {
@@ -126,7 +153,9 @@ public class GrainsManager {
         } 
         
         grains = new ArrayList<>();
+        recrystallisedGrains = new ArrayList<>();
         color2grain = new HashMap<>();
+        color2recrystallisedGrain = new HashMap<>();
     }
     
     public void removeGrains(Set<GrainImpl> grainsToRemove, boolean removeBorder) {
@@ -141,8 +170,11 @@ public class GrainsManager {
                 while(!cells.isEmpty()) {
                     cells.get(0).removeFromGrain();
                 }
+            
             grains.remove(grain);
             color2grain.remove(grain.getColor());
+            color2recrystallisedGrain.remove(grain.getColor());
+            recrystallisedGrains.remove(grain);
         }
     }
     
@@ -161,10 +193,12 @@ public class GrainsManager {
                 cells.get(0).removeFromGrain();
             }
             
+            recrystallisedGrains.remove(grain);
+            color2recrystallisedGrain.remove(grain.getColor());
         }
         
         grains = new ArrayList<>(selectedGrains);
-        color2grain = grains.stream().collect(Collectors.toMap(GrainImpl::getColor, Function.identity()));
+        color2grain = grains.stream().collect(Collectors.toMap(GrainImpl::getColor, Function.identity())); 
     }
     
     public void removeAllInclusions() {
@@ -205,11 +239,20 @@ public class GrainsManager {
         removeAllInclusions();
     }
     
-    private Color getRandomColor() {
+    private Color getRandomColorForGrain() {
         Random randomizer = new Random();
-        int red = randomizer.nextInt(255);
-        int green = randomizer.nextInt(255);
-        int blue = randomizer.nextInt(255);
+        int red = randomizer.nextInt(11);  //values from 0 to 10
+        int green = randomizer.nextInt(245) + 11; // values from 11 to 255
+        int blue = randomizer.nextInt(245) + 11; // values from 11 to 255
+        
+        return Color.rgb(red, green, blue);
+    }
+    
+    private Color getRandomColorForRecrystallisedGrain() {
+        Random randomizer = new Random();
+        int red = randomizer.nextInt(245) + 11; // values from 11 to 255
+        int green = randomizer.nextInt(11); //values from 0 to 10
+        int blue = randomizer.nextInt(11); //values from 0 to 10
         
         return Color.rgb(red, green, blue);
     }

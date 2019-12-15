@@ -25,10 +25,15 @@ public class Cell {
     @Setter
     private int y;
 
+    @Getter
+    @Setter
+    private double energy;
+    
     public Cell(CellStatus status, int x, int y) {
         this.status = status;
         this.x = x;
         this.y = y;
+        energy = -1.0;
     }
     
     public void setGrain(Grain grain) {

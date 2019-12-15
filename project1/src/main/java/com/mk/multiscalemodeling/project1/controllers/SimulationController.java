@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.jfoenix.controls.JFXAlert;
@@ -12,6 +13,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
+import com.jfoenix.controls.JFXToggleButton;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import com.mk.multiscalemodeling.project1.JavaFxBridge;
 import com.mk.multiscalemodeling.project1.io.Exporter;
@@ -36,6 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -52,7 +55,7 @@ public class SimulationController implements Initializable {
     @FXML private StackPane paneForCanvas;
     @FXML private JFXDrawer parametersPane;
     @FXML private Canvas canvas;
-    
+    @FXML private JFXToggleButton energyDistributionToggle;
     
     private SimulationParametersController parametersController;
     private SimulationManager simulationManager;
@@ -139,6 +142,13 @@ public class SimulationController implements Initializable {
             exitAction();
         });
         
+        energyDistributionToggle.setOnAction(e -> {
+            if (energyDistributionToggle.isSelected()) {
+                drawEnergyOnCanvas();
+            } else {
+                drawCellsOnCanvas();
+            }
+        });
 
     }
         
@@ -152,7 +162,44 @@ public class SimulationController implements Initializable {
     
     public void drawCellsOnCanvas() {
         earseCanvas();
+        energyDistributionToggle.setSelected(false);
         draw(canvas, CELL_SIZE);
+    }
+    
+    public void drawEnergyOnCanvas() {
+        earseCanvas();
+        energyDistributionToggle.setSelected(true);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        Pair<Double, Double> minMax = simulationManager.getMinMaxEnergy();
+        
+        if (minMax == null) {
+            gc.setFill(Color.WHITE);
+            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            return;
+        }
+        
+        double energyRange = minMax.getRight() - minMax.getLeft();
+        double energyDt = energyRange / 255.0;
+        double minEnergy = minMax.getLeft();
+        
+        Cell[][] cells = simulationManager.getCells();
+        for (int i = 1; i < simulationManager.getDimX() + 1; i++) {
+            for (int j = 1; j < simulationManager.getDimY() + 1; j++) {  
+                Cell cell = cells[i][j];
+                
+                if (cell.getGrain() == null || cell.getEnergy() == -1) {
+                    gc.setFill(Color.WHITE);
+                } else if (cell.getEnergy() == 0.0) {
+                    gc.setFill(Color.RED);
+                } else {
+                    int energyColor = (int)((cell.getEnergy() - minEnergy) / energyDt);
+                    gc.setFill(Color.rgb(0, 128, energyColor));
+                }
+                
+                gc.fillRect((i - 1) * CELL_SIZE, (j - 1) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+        
     }
     
     private void drawToImage(Canvas canvasToImage) {
