@@ -108,10 +108,10 @@ public class SimulationController implements Initializable {
             y++;
             
             Cell selectedCell = simulationManager.getCells()[x][y];
-            log.info("Selected cell X: {}, Y:{}, Color: {}, Status: {}", selectedCell.getX(), selectedCell.getY(), 
-                    (selectedCell.getGrain() != null) ? selectedCell.getGrain().getColor() : null, selectedCell.getStatus());
+            log.info("Selected cell X: {}, Y:{}, Color: {}, Status: {}, Grain Status: {}", selectedCell.getX(), selectedCell.getY(), 
+                    (selectedCell.getGrain() != null) ? selectedCell.getGrain().getColor() : null, selectedCell.getStatus(),
+                            (selectedCell.getGrain() != null) ? selectedCell.getGrain().getStatus() : null);
               
-            
             if (parametersController.getEditModeStatus()) {
                 //Select Grain
                 if (e.getButton() == MouseButton.PRIMARY) {

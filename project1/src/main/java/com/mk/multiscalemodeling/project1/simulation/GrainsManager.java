@@ -241,18 +241,18 @@ public class GrainsManager {
     
     private Color getRandomColorForGrain() {
         Random randomizer = new Random();
-        int red = randomizer.nextInt(11);  //values from 0 to 10
-        int green = randomizer.nextInt(245) + 11; // values from 11 to 255
-        int blue = randomizer.nextInt(245) + 11; // values from 11 to 255
+        int red = randomizer.nextInt(4);  //values from 0 to 3
+        int green = randomizer.nextInt(251) + 4; // values from 4 to 255
+        int blue = randomizer.nextInt(251) + 4; // values from 11 to 255
         
         return Color.rgb(red, green, blue);
     }
     
     private Color getRandomColorForRecrystallisedGrain() {
         Random randomizer = new Random();
-        int red = randomizer.nextInt(245) + 11; // values from 11 to 255
-        int green = randomizer.nextInt(11); //values from 0 to 10
-        int blue = randomizer.nextInt(11); //values from 0 to 10
+        int red = randomizer.nextInt(251) + 4; // values from 4 to 255
+        int green = randomizer.nextInt(4); //values from 0 to 3
+        int blue = randomizer.nextInt(4); //values from 0 to 3
         
         return Color.rgb(red, green, blue);
     }
