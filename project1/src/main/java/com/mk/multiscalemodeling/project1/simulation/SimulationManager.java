@@ -226,9 +226,10 @@ public class SimulationManager {
         List<Grain> nucleonsToAdd = grainsManager.createNeuclons(count, true);
         
         log.debug("Adding {} recristallised neuclons to simulation", count);
+        int iterationLimit = 10000;
         
         Random rand = new Random();
-        while (!nucleonsToAdd.isEmpty()) {
+        while (!nucleonsToAdd.isEmpty() && iterationLimit > 0) {
             // add 1 to move away from the absorbing edge
             int randomX = 1 + rand.nextInt(dimX);
             int randomY = 1 + rand.nextInt(dimY);
@@ -244,6 +245,8 @@ public class SimulationManager {
                 selectedCell.setGrain(nucleonsToAdd.remove(0));
                 log.trace("Recrystallised nucleon added to cell array ({},{})", randomX, randomY);
             }
+            
+            iterationLimit--;
         }
     }
     

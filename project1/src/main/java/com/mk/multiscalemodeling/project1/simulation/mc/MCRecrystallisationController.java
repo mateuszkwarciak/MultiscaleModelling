@@ -31,16 +31,17 @@ public class MCRecrystallisationController {
     public void simulateRecristalization(RecrystallisedLocationType locationType, RecrystallisedNucleatingType nucleatingType, int noOfNucleons, 
             int noOfIterations, double grainBoundaryEnergy) {
         
+        int newNucleons = noOfNucleons;
         for (int i = 0; i < noOfIterations; i++) {
-            int newNucleons = noOfNucleons;
+            
             
             if (nucleatingType.equals(RecrystallisedNucleatingType.BEGINING) && i == 0) {
                 simulationManager.addRecrystallisedNucleons(newNucleons, locationType);
             } else if (nucleatingType.equals(RecrystallisedNucleatingType.CONSTANT)) {
                 simulationManager.addRecrystallisedNucleons(newNucleons, locationType);
             } else if (nucleatingType.equals(RecrystallisedNucleatingType.INCREASING)) {
-                newNucleons += noOfNucleons;
                 simulationManager.addRecrystallisedNucleons(newNucleons, locationType);
+                newNucleons += noOfNucleons;
             }
             
             recristallise(grainBoundaryEnergy);
@@ -50,7 +51,8 @@ public class MCRecrystallisationController {
     
     private void recristallise(double grainBoundaryEnergy) {
         List<Cell> randomCells = simulationManager.getListOfRandomCells().stream()
-                .filter(cell -> cell.getStatus().equals(CellStatus.OCCUPIED)).collect(Collectors.toList());
+                .filter(cell -> cell.getStatus().equals(CellStatus.OCCUPIED) 
+                        && cell.getGrain().getStatus().equals(GrainStatus.GRAIN)).collect(Collectors.toList());
         List<Pair<Cell, Grain>> cell2update = new ArrayList<>();
         
         while (!randomCells.isEmpty()) {
@@ -64,21 +66,25 @@ public class MCRecrystallisationController {
             
             Grain orginalGrain = cell.getGrain();
             Grain grainAfterReorientation = neighbourhood.get(rand.nextInt(neighbourhood.size())).getGrain();
-            
+            if (!grainAfterReorientation.getStatus().equals(GrainStatus.RECRYSTALLISED) 
+                    || grainAfterReorientation.getStatus().equals(GrainStatus.FROZEN)) {
+                continue;
+            }
+                   
             double energyBefore = 8;
             double energyAfter = 8;
             
             for (Cell neighbor : neighbourhood) {
                 if (neighbor.getGrain().equals(orginalGrain)) {
-                    energyBefore--; 
+                    energyBefore -= 1; 
                 } else if (neighbor.getGrain().equals(grainAfterReorientation)) {
-                    energyAfter--;
+                    energyAfter -= 1;
                 } 
             }
-                    
-            energyBefore = grainBoundaryEnergy * energyBefore + cell.getEnergy();
-            energyAfter = grainBoundaryEnergy * energyAfter + cell.getEnergy();
-            log.info("Energy before: {}, energy after: {}", energyBefore, energyAfter);
+
+            energyBefore = (grainBoundaryEnergy * energyBefore) + cell.getEnergy();
+            energyAfter = grainBoundaryEnergy * energyAfter;
+
             if (energyAfter - energyBefore <= 0.0) {
                 //recrystallization
                 cell2update.add(Pair.of(cell, grainAfterReorientation));
@@ -139,6 +145,6 @@ public class MCRecrystallisationController {
     
     private boolean neighborCondition(Cell neighbour) {
         return (neighbour != null && neighbour.getStatus().equals(CellStatus.OCCUPIED) 
-                && neighbour.getGrain() != null && neighbour.getGrain().getStatus().equals(GrainStatus.RECRYSTALLISED));
+                && neighbour.getGrain() != null);
     }
 }
