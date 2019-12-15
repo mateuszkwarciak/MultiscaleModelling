@@ -24,9 +24,10 @@ public class MonteCarloController {
         this.simulationManager = simulationManager;
     }
     
-    public Grain resolveCellMembership(Cell selectedCell, double energyJ) {
+    public Grain resolveCellMembership(Cell selectedCell, double grainBoundaryEnergy) {
         List<Cell> neighbourhoodCells = getMooreNeighbourhood(selectedCell);
-        if (CollectionUtils.isEmpty(neighbourhoodCells) || selectedCell.getGrain().getStatus().equals(GrainStatus.FROZEN)) {
+        if (CollectionUtils.isEmpty(neighbourhoodCells) || (selectedCell.getGrain() != null 
+                && selectedCell.getGrain().getStatus().equals(GrainStatus.FROZEN))) {
             return selectedCell.getGrain();
         }
         
@@ -39,8 +40,8 @@ public class MonteCarloController {
         }
         Grain grainForSubstitution = uniqueGrains.get(rand.nextInt(uniqueGrains.size()));
         
-        int energyBefore = 8;
-        int energyAfter = 8;
+        double energyBefore = 8;
+        double energyAfter = 8;
         for (Cell neighbor : neighbourhoodCells) {
             if (neighbor.getGrain().equals(orginalGrain)) {
                 energyBefore--; 
@@ -48,6 +49,9 @@ public class MonteCarloController {
                 energyAfter--;
             } 
         } 
+        
+        energyBefore = energyBefore * grainBoundaryEnergy;
+        energyAfter = energyAfter * grainBoundaryEnergy;
         
         if ((energyAfter - energyBefore) <= 0) {
             return grainForSubstitution;

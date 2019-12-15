@@ -2,6 +2,6 @@ package com.mk.multiscalemodeling.project1.model;
 
 public enum GrainStatus {
     
-    GRAIN, INCLUSION, FROZEN, BORDER;
+    GRAIN, RECRYSTALLISED, INCLUSION, FROZEN, BORDER;
 
 }

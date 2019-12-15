@@ -92,7 +92,7 @@ public class BorderService {
         }
     }
     
-    private boolean checkIfOnEdge(Cell cell) {
+    public boolean checkIfOnEdge(Cell cell) {
         if (edgeCondition(cell, simulationManager.getFromAbove(cell)) || (edgeCondition(cell, simulationManager.getFromLeft(cell))) ||
                 (edgeCondition(cell, simulationManager.getFromBelow(cell))) || (edgeCondition(cell, simulationManager.getFromRight(cell)))) {
             return true;
