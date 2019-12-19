@@ -350,10 +350,10 @@ public class SimulationParametersController implements Initializable{
         }
         
         int noOfNucleons = getIntegerFormField(noRecrystalliezedNucleonsField);
-        if (noOfNucleons == 0) {
-            simulationController.showAlert("Warning", "Number of nucleaons should be greather than 0");
-            return;
-        }
+        //if (noOfNucleons == 0) {
+        //    simulationController.showAlert("Warning", "Number of nucleaons should be greather than 0");
+        //    return;
+        //}
         
         int noOfIterations = getIntegerFormField(noRecrystallisationIterationsField);
         if (noOfIterations == 0) {

@@ -216,7 +216,7 @@ public class SimulationManager {
     public void simulateMC(Double grainBoundaryEnergy) {
         getListOfRandomCells().stream().forEach(cell -> {
             Grain resolvedGrain = mcController.resolveCellMembership(cell, grainBoundaryEnergy);
-            if (!cell.getGrain().equals(resolvedGrain)) {
+            if (cell.getGrain() != null && !cell.getGrain().equals(resolvedGrain)) {
                 cell.setGrain(resolvedGrain);
             }
         });
